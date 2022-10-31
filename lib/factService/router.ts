@@ -13,7 +13,11 @@ export default router
   .post("/:id", update)
   .delete("/:id", remove);
 
-function findFactsByPathKeys(request: Request, response: Response, next: NextFunction) {
+function findFactsByPathKeys(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+) {
   const { limit, offset, orderBy } = getQueryOptions(request.query);
   let { path, key } = request.query;
   if (path == undefined || `${path}`.length < 1)
@@ -31,7 +35,7 @@ function findFactsByPathKeys(request: Request, response: Response, next: NextFun
 function getByIdOrPath(
   request: Request,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   let { id } = request.params;
   if (id == undefined || `${id}`.length < 1)
@@ -39,7 +43,7 @@ function getByIdOrPath(
   if (Number.isInteger(id)) {
     factsDbClient
       .findById(Number(id))
-      .then(([item]) => response.status(200).send(item))
+      .then((item) => response.status(200).send(item))
       .catch(next);
   } else {
     factsDbClient
@@ -79,7 +83,7 @@ function update(request: Request, response: Response, next: NextFunction) {
     .then((updated) =>
       updated.length >= 1
         ? response.status(200).json({ updated })
-        : response.status(410).json()
+        : response.status(410).json(),
     )
     .catch(next);
 }
@@ -94,7 +98,7 @@ function remove(request: Request, response: Response, next: NextFunction) {
     .then((deleted) =>
       deleted.message
         ? response.status(204).json(deleted.message)
-        : response.status(404).json({ message: "Nothing deleted!" })
+        : response.status(404).json({ message: "Nothing deleted!" }),
     )
     .catch(next);
 }

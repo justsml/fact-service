@@ -12,7 +12,7 @@ export function getQueryOptions(
     limit?: number;
     orderBy?: string;
   },
-  { defaultOffset = 0, defaultLimit = 20, defaultOrderBy = "-id" } = {}
+  { defaultOffset = 0, defaultLimit = 20, defaultOrderBy = "-id" } = {},
 ) {
   let {
     offset = defaultOffset,
@@ -33,4 +33,4 @@ export const checkDuplicateKeyError = (error: Error) => {
     throw new UserError("Fact already exists!");
   }
   throw error;
-}
+};

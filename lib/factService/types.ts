@@ -1,11 +1,7 @@
 import type { IQueryParameters } from "../../common/routeUtils";
 
-export interface IFactServiceQuery {
-  path: string;
-  key: string | string[];
-}
-
-export interface IFact {
+/** Fact type describes records in the `fact_store` table. */
+export interface Fact {
   id: number | bigint | string;
   path: string;
   key: string;
@@ -14,11 +10,26 @@ export interface IFact {
   updated_at?: Date;
 }
 
-export interface IFactClient {
-  findById: (id: number | bigint) => Promise<IFact>;
-  findFactsByPathKeys: (query: IFactServiceQuery & IQueryParameters) => Promise<IFact[]>;
-  findAllFactsByPath: (query: { path: string } & IQueryParameters) => Promise<IFact[]>;
-  create: (data: Omit<IFact, "id">) => Promise<IFact[]>;
-  update: (data: IFact) => Promise<IFact[]>;
+/**
+ * The FactService interface helps our client and server stay aligned.
+ */
+export interface FactClient {
+  findById: (id: number | bigint) => Promise<Fact>;
+  /**
+   * 
+   */
+  findFactsByPathKeys: (
+    query: IFactServiceQuery & IQueryParameters,
+  ) => Promise<Fact[]>;
+  findAllFactsByPath: (
+    query: { path: string } & IQueryParameters,
+  ) => Promise<Fact[]>;
+  create: (data: Omit<Fact, "id">) => Promise<Fact[]>;
+  update: (data: Fact) => Promise<Fact[]>;
   removeById: (id: number | bigint) => Promise<{ message: string }>;
+}
+
+export interface IFactServiceQuery {
+  path: string;
+  key: string | string[];
 }

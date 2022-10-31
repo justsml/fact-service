@@ -2,16 +2,37 @@
 
 > Reference Nodejs, TypeScript, Express & Knex Project
 
-## Setup dotenv
+- [Introduction](#introduction)
+- [Setup](#setup)
+  - [Create `.env` file](#create-env-file)
+  - [Initialize Database](#initialize-database)
+- [Start Service](#start-service)
+- [Testing](#testing)
+  - [Creating Facts](#creating-facts)
+  - [Query Facts](#query-facts)
+  - [Updating Facts](#updating-facts)
+- [Usage Notes](#usage-notes)
+  - [Fact type reference](#fact-type-reference)
+- [TODO](#todo)
 
-Copy your `.env.example` to `.env`.
+## Introduction
 
-## Setup Database
+The two most interesting parts of this project are [the database client](/lib/factService/clientDb.ts) and the [HTTP API client](/lib/factService/clientApi.ts).
+
+The rest of this README will get you up and running locally.
+
+## Setup
+
+### Create `.env` file
+
+Copy the `.env.example` to `.env`.
+
+### Initialize Database
 
 ```sh
 mkdir -p $HOME/.postgres-data
 docker run \
-  --name pg-server \
+  --name facts-database \
   -v $HOME/.postgres-data:/var/lib/postgresql/data \
   -p 127.0.0.1:5432:5432 \
   -e 'POSTGRES_PASSWORD=tru3ted' \
@@ -26,9 +47,10 @@ docker run \
     -c 'max_connections=200'
 ```
 
-## Start Service Locally
+## Start Service
 
 ```sh
+npm install
 npm start
 ```
 
@@ -71,9 +93,19 @@ curl --request GET \
 
 #### Get all Facts matching a path
 
+Finds all Facts matching the path `user`.
+
 ```sh
 curl --request GET \
   --url http://127.0.0.1:3000/api/facts/user
+```
+
+Finds all Facts matching the path `user/overrides`.
+
+```sh
+curl --request GET \
+  --url http://127.0.0.1:3000/api/facts/user%2Foverrides
+# Note the URI Escaped path: user%2Foverrides (i.e. user/overrides)
 ```
 
 ### Updating Facts
@@ -87,6 +119,38 @@ curl --request POST \
   "key": "456",
   "value": "{\"json\": true, \"updated\": \"🚀\"}"
 }'
+```
+
+## Usage Notes
+
+The client library to interact with [the database](/lib/factService/clientDb.ts) and [HTTP endpoints](/lib/factService/clientApi.ts) is implemented following this interface:
+
+```ts
+export interface FactClient {
+  findById: (id: number | bigint) => Promise<Fact>;
+  findFactsByPathKeys: (
+    query: IFactServiceQuery & IQueryParameters,
+  ) => Promise<Fact[]>;
+  findAllFactsByPath: (
+    query: { path: string } & IQueryParameters,
+  ) => Promise<Fact[]>;
+  create: (data: Omit<Fact, "id">) => Promise<Fact[]>;
+  update: (data: Fact) => Promise<Fact[]>;
+  removeById: (id: number | bigint) => Promise<{ message: string }>;
+}
+```
+
+### Fact type reference
+
+```ts
+export type Fact = {
+  id: number | bigint | string;
+  path: string;
+  key: string;
+  value: object;
+  created_at?: Date;
+  updated_at?: Date;
+};
 ```
 
 ## TODO

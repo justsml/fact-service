@@ -1,4 +1,3 @@
-
 export default class UserError extends Error {
   name = "UserError";
   constructor(message: string, public status: number = 500) {
