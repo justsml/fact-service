@@ -1,4 +1,4 @@
-import knex from "../../db/knex"; // TODO: Adjust path as needed!
+import knex from "../../db/knex";
 import { checkDuplicateKeyError } from "../../common/routeUtils";
 import { toArray } from "../../common/arrayUtils";
 import type { Fact, FactService } from "./types";
