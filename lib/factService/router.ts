@@ -40,17 +40,10 @@ function getByIdOrPath(
   let { id } = request.params;
   if (id == undefined || `${id}`.length < 1)
     return next(new UserError("Id/Path is required!"));
-  if (Number.isInteger(id)) {
-    factsDbClient
-      .findById(Number(id))
-      .then((item) => response.status(200).send(item))
-      .catch(next);
-  } else {
-    factsDbClient
-      .findAllFactsByPath({ path: id, limit: 200 })
-      .then((facts) => response.status(200).send(facts))
-      .catch(next);
-  }
+  factsDbClient
+    .findAllFactsByPath({ path: id, limit: 200 })
+    .then((facts) => response.status(200).send(facts))
+    .catch(next);
 }
 
 function create(request: Request, response: Response, next: NextFunction) {

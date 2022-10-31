@@ -11,22 +11,23 @@ export interface Fact {
 }
 
 /**
- * The FactService interface helps our client and server stay aligned.
+ * The FactService interface helps our http & database clients stay aligned.
  */
-export interface FactClient {
-  findById: (id: number | bigint) => Promise<Fact>;
-  /**
-   * 
-   */
+export interface FactService {
+  /** Create a Fact, include `path`, `key`, and `value` */
+  create: (fact: Omit<Fact, "id">) => Promise<Fact[]>;
+  /** Update a Fact, include `id`, `path`, `key`, and `value` */
+  update: (fact: Fact) => Promise<Fact[]>;
+  /** Delete a Fact by id */
+  removeById: (id: number | bigint) => Promise<{ message: string }>;
+  /** Find all facts matching a path and one or more keys. */
   findFactsByPathKeys: (
     query: IFactServiceQuery & IQueryParameters,
   ) => Promise<Fact[]>;
+  /** Find all facts by path */
   findAllFactsByPath: (
     query: { path: string } & IQueryParameters,
   ) => Promise<Fact[]>;
-  create: (data: Omit<Fact, "id">) => Promise<Fact[]>;
-  update: (data: Fact) => Promise<Fact[]>;
-  removeById: (id: number | bigint) => Promise<{ message: string }>;
 }
 
 export interface IFactServiceQuery {

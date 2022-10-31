@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon --watch './**/*.ts' --exec 'ts-node' index.ts",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,css,scss,md}'"
   },
   "keywords": [
     "key-value",
@@ -44,6 +45,7 @@
     "@types/morgan": "^1.9.3",
     "@types/node": "^18.11.8",
     "nodemon": "^2.0.20",
+    "prettier": "^2.7.1",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.4"

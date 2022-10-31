@@ -2,26 +2,26 @@
 
 > Reference Nodejs, TypeScript, Express & Knex Project
 
-- [Introduction](#introduction)
-- [Setup](#setup)
+- [Overview](#overview)
+- [Getting Started](#getting-started)
   - [Create `.env` file](#create-env-file)
   - [Initialize Database](#initialize-database)
-- [Start Service](#start-service)
+  - [Start Service](#start-service)
 - [Testing](#testing)
   - [Creating Facts](#creating-facts)
   - [Query Facts](#query-facts)
   - [Updating Facts](#updating-facts)
-- [Usage Notes](#usage-notes)
-  - [Fact type reference](#fact-type-reference)
 - [TODO](#todo)
 
-## Introduction
+## Overview
 
-The two most interesting parts of this project are [the database client](/lib/factService/clientDb.ts) and the [HTTP API client](/lib/factService/clientApi.ts).
+The [`FactService`](lib/factService/types.ts#L16) interface helps keep two modules aligned - [the database client](/lib/factService/clientDb.ts) and the [Axios HTTP client API](/lib/factService/clientApi.ts). _The HTTP API is portable and can be used in any JS/TS project._
+
+The database schema & configuration is implemented using a Knex migration. Check it out in [the `./db/migrations` directory](/db/migrations/20221030233239_fact_store.js).
 
 The rest of this README will get you up and running locally.
 
-## Setup
+## Getting Started
 
 ### Create `.env` file
 
@@ -47,10 +47,11 @@ docker run \
     -c 'max_connections=200'
 ```
 
-## Start Service
+### Start Service
 
 ```sh
 npm install
+npx knex migrate:latest
 npm start
 ```
 
@@ -121,40 +122,9 @@ curl --request POST \
 }'
 ```
 
-## Usage Notes
-
-The client library to interact with [the database](/lib/factService/clientDb.ts) and [HTTP endpoints](/lib/factService/clientApi.ts) is implemented following this interface:
-
-```ts
-export interface FactClient {
-  findById: (id: number | bigint) => Promise<Fact>;
-  findFactsByPathKeys: (
-    query: IFactServiceQuery & IQueryParameters,
-  ) => Promise<Fact[]>;
-  findAllFactsByPath: (
-    query: { path: string } & IQueryParameters,
-  ) => Promise<Fact[]>;
-  create: (data: Omit<Fact, "id">) => Promise<Fact[]>;
-  update: (data: Fact) => Promise<Fact[]>;
-  removeById: (id: number | bigint) => Promise<{ message: string }>;
-}
-```
-
-### Fact type reference
-
-```ts
-export type Fact = {
-  id: number | bigint | string;
-  path: string;
-  key: string;
-  value: object;
-  created_at?: Date;
-  updated_at?: Date;
-};
-```
-
 ## TODO
 
+- [ ] Add an API method to get stats on unique `paths` with the # of keys per path.
 - [ ] Add Zod Validation.
 - [ ] Add HTTP API Client.
 - [ ] Add HTTP API Tests.

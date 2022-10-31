@@ -1,15 +1,27 @@
 import knex from "../../db/knex"; // TODO: Adjust path as needed!
 import { checkDuplicateKeyError } from "../../common/routeUtils";
 import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactClient } from "./types";
+import type { Fact, FactService } from "./types";
 
-const FactDatabaseClient: FactClient = {
-  findById: (id) =>
+const FactDatabaseClient: FactService = {
+  create: (fact) =>
     knex<Fact>("fact_store")
-      .select("*")
-      .limit(1)
+      .insert(fact)
+      .returning("*")
+      .catch(checkDuplicateKeyError),
+
+  update: ({ id, ...fact }) =>
+    knex<Fact>("fact_store")
+      .where({ id })
+      .update(fact)
+      .returning("*")
+      .catch(checkDuplicateKeyError),
+
+  removeById: (id) =>
+    knex<Fact>("fact_store")
       .where("id", `${id}`)
-      .then((rows) => rows[0]),
+      .delete()
+      .then(() => ({ message: `Deleted any fact with an id equal to ${id}` })),
 
   findFactsByPathKeys: (
     { path, key, limit } = {
@@ -34,25 +46,6 @@ const FactDatabaseClient: FactClient = {
       .select("*")
       .limit(limit ?? 250)
       .where("path", path),
-
-  create: (fact) =>
-    knex<Fact>("fact_store")
-      .insert(fact)
-      .returning("*")
-      .catch(checkDuplicateKeyError),
-
-  update: ({ id, ...fact }) =>
-    knex<Fact>("fact_store")
-      .where({ id })
-      .update(fact)
-      .returning("*")
-      .catch(checkDuplicateKeyError),
-
-  removeById: (id) =>
-    knex<Fact>("fact_store")
-      .where("id", `${id}`)
-      .delete()
-      .then(() => ({ message: `Successfully deleted fact with id ${id}` })),
 };
 
 export default FactDatabaseClient;

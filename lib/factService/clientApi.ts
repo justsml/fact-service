@@ -1,7 +1,6 @@
 import axios from "axios";
 import { toArray } from "../../common/arrayUtils";
-import { IQueryParameters } from "../../common/routeUtils";
-import type { Fact, FactClient, IFactServiceQuery } from "./types";
+import type { Fact, FactService } from "./types";
 
 const FactsConfig = {
   baseUrl: process.env.FACTS_SERVICE_URL ?? "http://localhost:3000/api/facts",
@@ -9,15 +8,18 @@ const FactsConfig = {
 
 const client = axios.create({ baseURL: FactsConfig.baseUrl });
 
-const FactApiClient: FactClient = {
-  findById: (id: number | bigint) =>
-    client.get<Fact>(`/${id}`).then((res) => res.data),
+/**
+ * This is the HTTP client for the FactService.
+ */
+const FactApiClient: FactService = {
+  create: (fact) => client.put(`/`, fact),
 
-  findFactsByPathKeys: ({
-    path,
-    key,
-    limit,
-  }: IFactServiceQuery & IQueryParameters) =>
+  update: ({ id, ...fact }) =>
+    client.post<Fact[]>(`/${id}`, fact).then((res) => res.data),
+
+  removeById: (id) => client.delete(`/${id}`).then((res) => res.data),
+
+  findFactsByPathKeys: ({ path, key, limit }) =>
     client
       .get<Fact[]>(`/`, {
         params: {
@@ -28,27 +30,14 @@ const FactApiClient: FactClient = {
       })
       .then((res) => res.data),
 
-  findAllFactsByPath: (
-    { path, limit }: { path: string } & IQueryParameters = {
-      path: "",
-      limit: 250,
-    },
-  ) =>
+  findAllFactsByPath: ({ path, limit }) =>
     client
-      .get<Fact[]>(`/${path}`, {
+      .get<Fact[]>(`/${encodeURIComponent(path)}`, {
         params: {
-          limit,
+          limit: limit ?? 250,
         },
       })
       .then((res) => res.data),
-
-  create: (data: Omit<Fact, "id">) => axios.put(`/`, data),
-
-  update: ({ id, ...data }: Fact) =>
-    client.post<Fact[]>(`/${id}`, data).then((res) => res.data),
-
-  removeById: (id: number | bigint) =>
-    client.delete(`/${id}`).then((res) => ({ message: res.data })),
 };
 
 export default FactApiClient;
