@@ -1,61 +1,84 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
 import express, { Request, Response, NextFunction } from "express";
 import factsClient from "./client";
-import { getQueryOptions } from "../../utils/route-utils";
-import UserError from "./userError";
+import { getQueryOptions } from "../../common/routeUtils";
+import UserError from "../../common/userError";
 
 const router = express.Router();
 
 export default router
   .get("/", findByPath)
-  .get("/:id", getById)
+  .get("/:id", getByIdOrPath)
   .put("/", create)
   .post("/:id", update)
   .delete("/:id", remove);
 
-// TODO: Add data validation before inserting into database! Examples: regex, mongoose, Zod, bookshelf, JSON Schema, etc.
-
 function findByPath(request: Request, response: Response, next: NextFunction) {
   const { limit, offset, orderBy } = getQueryOptions(request.query);
-  let {path, key} = request.query;
-  if (path == undefined || `${path}`.length < 1) return next(new UserError("Path is required!"));
-  if (key == undefined || `${key}`.length < 1) return next(new UserError("Key is required!"));
+  let { path, key } = request.query;
+  if (path == undefined || `${path}`.length < 1)
+    return next(new UserError("Path is required!"));
+  if (key == undefined || `${key}`.length < 1)
+    return next(new UserError("Key is required!"));
   path = `${path}`;
-  key = `${key}`.split(',');
-  factsClient.findByPath({ path, key, limit, offset, orderBy })
-    .then((facts) => response.status(200).send({ data: facts }))
+  key = `${key}`.split(",");
+  factsClient
+    .findFactsByPathKeys({ path, key, limit, offset, orderBy })
+    .then((facts) => response.status(200).send({ facts }))
     .catch(next);
 }
 
-function getById(request: Request, response: Response, next: NextFunction) {
-  factsClient
-    .getById(Number(request.params.id))
-    .then(([item]) => response.status(200).send({ data: item }))
-    .catch(next);
+function getByIdOrPath(
+  request: Request,
+  response: Response,
+  next: NextFunction
+) {
+  let { id } = request.params;
+  if (id == undefined || `${id}`.length < 1)
+    return next(new UserError("Id/Path is required!"));
+  if (Number.isInteger(id)) {
+    factsClient
+      .findById(Number(id))
+      .then(([item]) => response.status(200).send(item))
+      .catch(next);
+  } else {
+    factsClient
+      .findAllFactsByPath({ path: id, limit: 200 })
+      .then((facts) => response.status(200).send(facts))
+      .catch(next);
+  }
 }
 
 function create(request: Request, response: Response, next: NextFunction) {
-  let {path, key} = request.body;
-  if (path == undefined || `${path}`.length < 1) return next(new UserError("Path is required!"));
-  if (key == undefined || `${key}`.length < 1) return next(new UserError("Key is required!"));
+  let { path, key, value } = request.body;
+  if (path == undefined || `${path}`.length < 1)
+    return next(new UserError("Path is required!"));
+  if (key == undefined || `${key}`.length < 1)
+    return next(new UserError("Key is required!"));
+  if (value == undefined || `${value}`.length < 1)
+    return next(new UserError("Value is required!"));
+
   factsClient
-    .create(request.body)
-    .then((data) => response.status(201).json({ data }))
+    .create({ path, key, value })
+    .then((facts) => response.status(201).json({ facts }))
     .catch(next);
 }
 
 function update(request: Request, response: Response, next: NextFunction) {
   const { id } = request.params;
-  if (id == undefined || `${id}`.length < 1) return next(new UserError("Id is required!"));
-  let {path, key, value} = request.body;
-  if (path == undefined || `${path}`.length < 1) return next(new UserError("Path is required!"));
-  if (key == undefined || `${key}`.length < 1) return next(new UserError("Key is required!"));
-  
+  if (id == undefined || `${id}`.length < 1)
+    return next(new UserError("Id is required!"));
+  let { path, key, value } = request.body;
+  if (path == undefined || `${path}`.length < 1)
+    return next(new UserError("Path is required!"));
+  if (key == undefined || `${key}`.length < 1)
+    return next(new UserError("Key is required!"));
+
   factsClient
-    .update({id, path, key, value})
-    .then((count) =>
-      count >= 1
-        ? response.status(200).json({ data: request.body })
+    .update({ id, path, key, value, updated_at: new Date() })
+    .then((updated) =>
+      updated.length >= 1
+        ? response.status(200).json({ updated })
         : response.status(410).json()
     )
     .catch(next);
@@ -63,13 +86,14 @@ function update(request: Request, response: Response, next: NextFunction) {
 
 function remove(request: Request, response: Response, next: NextFunction) {
   const { id } = request.params;
-  if (id == undefined || `${id}`.length < 1) return next(new UserError("Id is required!"));
+  if (id == undefined || `${id}`.length < 1)
+    return next(new UserError("Id is required!"));
 
   factsClient
-    .remove(BigInt(id))
-    .then((count) =>
-      count >= 1
-        ? response.status(204).json()
+    .removeById(BigInt(id))
+    .then((deleted) =>
+      deleted.message
+        ? response.status(204).json(deleted.message)
         : response.status(404).json({ message: "Nothing deleted!" })
     )
     .catch(next);

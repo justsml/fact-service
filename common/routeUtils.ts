@@ -1,3 +1,5 @@
+import UserError from "./userError";
+
 export function getQueryOptions(
   query: {
     offset?: number;
@@ -18,4 +20,11 @@ export function getQueryOptions(
   offset = offset > 100000 ? 100000 : offset;
   limit = limit > 100 ? 100 : limit;
   return { offset, limit, orderBy: orderByPair };
+}
+
+export const checkDuplicateKeyError = (error: Error) => {
+  if (error.message.includes("duplicate key value violates unique")) {
+    throw new UserError("Fact already exists!");
+  }
+  throw error;
 }

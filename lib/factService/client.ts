@@ -1,5 +1,6 @@
+import { checkDuplicateKeyError } from "../../common/routeUtils";
 import knex from "../../db/knex"; // TODO: Adjust path as needed!
-import UserError from "./userError";
+import { toArray } from "../../common/arrayUtils";
 
 interface IQueryParameters {
   limit?: number;
@@ -21,10 +22,7 @@ interface IFact {
   updated_at?: Date;
 }
 
-const arrayify = <TItem>(value: TItem | TItem[]) =>
-  Array.isArray(value) ? value : [value];
-
-const FactClient = {
+const FactDatabaseClient = {
   getAll: ({
     limit = 50,
     offset = 0,
@@ -37,10 +35,10 @@ const FactClient = {
       .orderBy(...(orderBy ?? ["id", "asc"]))
       .then((rows) => rows.map((row) => row)),
 
-  getById: ( id: number | bigint) =>
-    knex<IFact>("fact_store").select("*").limit(1).where('id', `${id}`),
+  findById: (id: number | bigint) =>
+    knex<IFact>("fact_store").select("*").limit(1).where("id", `${id}`),
 
-  findByPath: (
+  findFactsByPathKeys: (
     { path, key, limit }: IFactServiceQuery & IQueryParameters = {
       path: "",
       key: "",
@@ -51,24 +49,33 @@ const FactClient = {
       .select("*")
       .limit(limit ?? 50)
       .where("path", path)
-      .and
-      .whereIn("key", arrayify(key)),
+      .and.whereIn("key", toArray(key)),
 
-  create: (data: IFact) =>
+  findAllFactsByPath: (
+    { path, limit }: { path: string } & IQueryParameters = {
+      path: "",
+      limit: 250,
+    }
+  ) =>
+    knex("fact_store")
+      .select("*")
+      .limit(limit ?? 250)
+      .where("path", path),
+
+  create: (data: Omit<IFact, "id">) =>
     knex("fact_store")
       .insert(data)
       .returning("*")
-      .catch(error => {
-        if (error.message.includes("duplicate key value violates unique constraint")) {
-          throw new UserError("Fact already exists!");
-        }
-      }),
+      .catch(checkDuplicateKeyError),
 
   update: ({ id, ...data }: IFact) =>
-    knex("fact_store").where({ id }).update(data),
+    knex("fact_store").where({ id }).update(data).returning("*").catch(checkDuplicateKeyError),
 
-  remove: (id: number | bigint) =>
-    knex("fact_store").where('id', `${id}`).delete(),
+  removeById: (id: number | bigint) =>
+    knex("fact_store")
+      .where("id", `${id}`)
+      .delete()
+      .then(() => ({ message: `Successfully deleted fact with id ${id}` })),
 };
 
-export default FactClient;
+export default FactDatabaseClient;

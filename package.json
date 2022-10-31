@@ -1,15 +1,18 @@
 {
   "name": "fact-service",
   "version": "1.0.0",
-  "description": "Setup",
+  "description": "Enhanced Key-Value lookup service. Uses Nodejs, TypeScript, Express & Knex Project.",
   "main": "index.js",
   "scripts": {
     "start": "nodemon --watch './**/*.ts' --exec 'ts-node' index.ts",
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["key-value", "postgres", "lookup", "service", "nodejs", "typescript", "express", "knex"],
+  "author": {
+    "name": "Dan Levy",
+    "url": "https://danlevy.net"
+  },
+  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

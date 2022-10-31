@@ -4,11 +4,11 @@ import morgan from "morgan";
 import helmet from "helmet";
 // import cors from "cors";
 import FactRouter from "./lib/factService/router";
-import UserError from "./lib/factService/userError";
+import UserError from "./common/userError";
 
 const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 
-export default express()
+export default () => express()
   .use(helmet())
   .use(express.json())
   .use(express.urlencoded({ extended: false }))
