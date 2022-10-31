@@ -1,19 +1,19 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
 import express, { Request, Response, NextFunction } from "express";
-import factsClient from "./client";
+import factsDbClient from "./clientDb";
 import { getQueryOptions } from "../../common/routeUtils";
 import UserError from "../../common/userError";
 
 const router = express.Router();
 
 export default router
-  .get("/", findByPath)
+  .get("/", findFactsByPathKeys)
   .get("/:id", getByIdOrPath)
   .put("/", create)
   .post("/:id", update)
   .delete("/:id", remove);
 
-function findByPath(request: Request, response: Response, next: NextFunction) {
+function findFactsByPathKeys(request: Request, response: Response, next: NextFunction) {
   const { limit, offset, orderBy } = getQueryOptions(request.query);
   let { path, key } = request.query;
   if (path == undefined || `${path}`.length < 1)
@@ -22,7 +22,7 @@ function findByPath(request: Request, response: Response, next: NextFunction) {
     return next(new UserError("Key is required!"));
   path = `${path}`;
   key = `${key}`.split(",");
-  factsClient
+  factsDbClient
     .findFactsByPathKeys({ path, key, limit, offset, orderBy })
     .then((facts) => response.status(200).send({ facts }))
     .catch(next);
@@ -37,12 +37,12 @@ function getByIdOrPath(
   if (id == undefined || `${id}`.length < 1)
     return next(new UserError("Id/Path is required!"));
   if (Number.isInteger(id)) {
-    factsClient
+    factsDbClient
       .findById(Number(id))
       .then(([item]) => response.status(200).send(item))
       .catch(next);
   } else {
-    factsClient
+    factsDbClient
       .findAllFactsByPath({ path: id, limit: 200 })
       .then((facts) => response.status(200).send(facts))
       .catch(next);
@@ -58,7 +58,7 @@ function create(request: Request, response: Response, next: NextFunction) {
   if (value == undefined || `${value}`.length < 1)
     return next(new UserError("Value is required!"));
 
-  factsClient
+  factsDbClient
     .create({ path, key, value })
     .then((facts) => response.status(201).json({ facts }))
     .catch(next);
@@ -74,7 +74,7 @@ function update(request: Request, response: Response, next: NextFunction) {
   if (key == undefined || `${key}`.length < 1)
     return next(new UserError("Key is required!"));
 
-  factsClient
+  factsDbClient
     .update({ id, path, key, value, updated_at: new Date() })
     .then((updated) =>
       updated.length >= 1
@@ -89,7 +89,7 @@ function remove(request: Request, response: Response, next: NextFunction) {
   if (id == undefined || `${id}`.length < 1)
     return next(new UserError("Id is required!"));
 
-  factsClient
+  factsDbClient
     .removeById(BigInt(id))
     .then((deleted) =>
       deleted.message

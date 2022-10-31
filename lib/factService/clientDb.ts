@@ -1,45 +1,27 @@
-import { checkDuplicateKeyError } from "../../common/routeUtils";
 import knex from "../../db/knex"; // TODO: Adjust path as needed!
+import { checkDuplicateKeyError, IQueryParameters } from "../../common/routeUtils";
 import { toArray } from "../../common/arrayUtils";
+import type { IFact, IFactClient, IFactServiceQuery } from "./types";
 
-interface IQueryParameters {
-  limit?: number;
-  offset?: number;
-  orderBy?: [string, "asc" | "desc"];
-}
-
-interface IFactServiceQuery {
-  path: string;
-  key: string | string[];
-}
-
-interface IFact {
-  id: number | bigint | string;
-  path: string;
-  key: string;
-  value: object;
-  created_at?: Date;
-  updated_at?: Date;
-}
-
-const FactDatabaseClient = {
-  getAll: ({
-    limit = 50,
-    offset = 0,
-    orderBy = ["id", "asc"],
-  }: IQueryParameters = {}) =>
-    knex<IFact>("fact_store")
-      .select("*")
-      .limit(limit)
-      .offset(offset)
-      .orderBy(...(orderBy ?? ["id", "asc"]))
-      .then((rows) => rows.map((row) => row)),
+const FactDatabaseClient: IFactClient = {
+  // findAll: ({
+  //   limit = 50,
+  //   offset = 0,
+  //   orderBy = ["id", "asc"],
+  // }: IQueryParameters = {}) =>
+  //   knex<IFact>("fact_store")
+  //     .select("*")
+  //     .limit(limit)
+  //     .offset(offset)
+  //     .orderBy(...(orderBy ?? ["id", "asc"]))
+  //     .then((rows) => rows.map((row) => row)),
 
   findById: (id: number | bigint) =>
-    knex<IFact>("fact_store").select("*").limit(1).where("id", `${id}`),
+    knex<IFact>("fact_store").select("*").limit(1).where("id", `${id}`)
+    .then((rows) => rows[0]),
 
   findFactsByPathKeys: (
-    { path, key, limit }: IFactServiceQuery & IQueryParameters = {
+    { path, key, limit } = {
       path: "",
       key: "",
       limit: 50,

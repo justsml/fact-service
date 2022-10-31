@@ -88,3 +88,10 @@ curl --request POST \
   "value": "{\"json\": true, \"updated\": \"🚀\"}"
 }'
 ```
+
+## TODO
+
+- [ ] Add Zod Validation.
+- [ ] Add HTTP API Client.
+- [ ] Add HTTP API Tests.
+- [ ] Add Integration Tests.

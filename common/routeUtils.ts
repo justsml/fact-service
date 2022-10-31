@@ -1,5 +1,11 @@
 import UserError from "./userError";
 
+export interface IQueryParameters {
+  limit?: number;
+  offset?: number;
+  orderBy?: [string, "asc" | "desc"];
+}
+
 export function getQueryOptions(
   query: {
     offset?: number;
