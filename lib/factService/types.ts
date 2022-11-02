@@ -20,6 +20,8 @@ export interface FactService {
   update: (fact: Fact) => Promise<Fact[]>;
   /** Delete a Fact by id */
   removeById: (id: number | bigint) => Promise<{ message: string }>;
+  /** Group & count unique paths */
+  getUniquePathCounts: () => Promise<{ path: string; count: number | string }[]>;
   /** Find all facts matching a path and one or more keys. */
   findFactsByPathKeys: (
     query: IFactServiceQuery & IQueryParameters,

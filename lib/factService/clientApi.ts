@@ -19,6 +19,9 @@ const FactApiClient: FactService = {
 
   removeById: (id) => client.delete(`/${id}`).then((res) => res.data),
 
+  getUniquePathCounts: () =>
+    client.get<{ path: string; count: number | string }[]>(`/?count=path`).then((res) => res.data),
+
   findFactsByPathKeys: ({ path, key, limit }) =>
     client
       .get<Fact[]>(`/`, {

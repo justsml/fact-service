@@ -23,6 +23,15 @@ const FactDatabaseClient: FactService = {
       .delete()
       .then(() => ({ message: `Deleted any fact with an id equal to ${id}` })),
 
+  getUniquePathCounts: () => {
+    return knex<{path: string, count: string | number}>("fact_store")
+      .select("path")
+      .count("path")
+      .groupBy("path")
+      .orderBy("count", "desc")
+      .then((rows) => rows.map((row) => ({ path: row.path, count: row.count })));
+  },
+
   findFactsByPathKeys: (
     { path, key, limit } = {
       path: "",

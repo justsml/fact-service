@@ -94,6 +94,13 @@ curl --request GET \
   --url 'http://127.0.0.1:3000/api/facts?path=user&key=123%2C456'
 ```
 
+#### Get the count for every unique path
+
+```sh
+curl --request GET \
+  --url 'http://127.0.0.1:3000/api/facts?count=path'
+```
+
 #### Get all Facts matching a path
 
 Finds all Facts matching the path `user`.

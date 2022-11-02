@@ -7,11 +7,21 @@ import UserError from "../../common/userError";
 const router = express.Router();
 
 export default router
-  .get("/", findFactsByPathKeys)
+  .get("/", getPaths)
   .get("/:id", getByIdOrPath)
   .put("/", create)
   .post("/:id", update)
   .delete("/:id", remove);
+
+// Determine if we are asked to query path counts or a find by path
+function getPaths(request: Request, response: Response, next: NextFunction) {
+  if (request.query.count === "path") {
+    return factsDbClient.getUniquePathCounts()
+      .then((facts) => response.status(200).send({ facts }))
+      .catch(next);
+  }
+  return findFactsByPathKeys(request, response, next);
+}
 
 function findFactsByPathKeys(
   request: Request,
