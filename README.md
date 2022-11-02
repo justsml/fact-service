@@ -55,6 +55,8 @@ npx knex migrate:latest
 npm start
 ```
 
+> To learn more about database workflows and how to use the Knex CLI, check out the [README_DB.md](/README_DB.md) file.
+
 ## Testing
 
 ### Creating Facts
