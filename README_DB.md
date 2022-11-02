@@ -40,9 +40,33 @@ To create a seed script, run:
 npx knex seed:make 01_retail_locations
 ```
 
+Update the default script to use `.truncate()` instead of `.del()`, for example:
+
+```js
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> } 
+ */
+exports.seed = async function(knex) {
+  // Deletes ALL existing entries and resets id sequences
+  await knex('table_name').truncate();
+
+  await knex('table_name').insert([
+    {id: 1, colName: 'rowValue1'},
+    {id: 2, colName: 'rowValue2'},
+    {id: 3, colName: 'rowValue3'},
+  ]);
+  // For visualizing the data added to the database:
+  // .returning('*')
+  // .then((rows) => {
+  //   console.log('inserted ', rows);
+  // });
+};
+```
+
 ### Running Seeds
 
-To run all seeds, run:
+To run all seed files in order, run:
 
 ```sh
 npx knex seed:run
