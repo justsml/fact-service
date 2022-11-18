@@ -28,9 +28,20 @@ export function getQueryOptions(
   return { offset, limit, orderBy: orderByPair };
 }
 
-export const checkDuplicateKeyError = (error: Error) => {
-  if (error.message.includes("duplicate key value violates unique")) {
-    throw new UserError("Fact already exists!");
-  }
-  throw error;
-};
+export const checkInvalidInputError =
+  <TContextType = unknown>(context: TContextType) =>
+  (error: Error) => {
+    console.error("ERROR", error);
+    const msg = error.message;
+    const lastPart = msg.split(`invalid input`)[1];
+    if (lastPart) throw new UserError(`Database Error: ${lastPart}`);
+    throw error;
+  };
+export const checkDuplicateKeyError =
+  <TContextType = unknown>(context: TContextType) =>
+  (error: Error) => {
+    if (error.message.includes("duplicate key value violates unique")) {
+      throw new UserError("Fact already exists!");
+    }
+    throw error;
+  };

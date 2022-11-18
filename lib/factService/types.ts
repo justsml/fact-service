@@ -10,6 +10,14 @@ export interface Fact {
   updated_at?: Date;
 }
 
+export type PathCountResults = Record<string, number>;
+export type IdentityType = Fact["id"]; // number | bigint | string;
+export type BatchResultMessage = {
+  success: boolean;
+  message: string;
+  count: number;
+};
+
 /**
  * The FactService interface helps our http & database clients stay aligned.
  */
@@ -19,9 +27,9 @@ export interface FactService {
   /** Update a Fact, include `id`, `path`, `key`, and `value` */
   update: (fact: Fact) => Promise<Fact[]>;
   /** Delete a Fact by id */
-  removeById: (id: number | bigint) => Promise<{ message: string }>;
+  removeById: (id: IdentityType) => Promise<BatchResultMessage>;
   /** Group & count unique paths */
-  getUniquePathCounts: () => Promise<{ path: string; count: number | string }[]>;
+  getPathCounts: () => Promise<PathCountResults>;
   /** Find all facts matching a path and one or more keys. */
   findFactsByPathKeys: (
     query: IFactServiceQuery & IQueryParameters,

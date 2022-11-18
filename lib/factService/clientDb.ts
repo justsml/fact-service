@@ -1,5 +1,8 @@
 import knex from "../../db/knex";
-import { checkDuplicateKeyError } from "../../common/routeUtils";
+import {
+  checkDuplicateKeyError,
+  checkInvalidInputError,
+} from "../../common/routeUtils";
 import { toArray } from "../../common/arrayUtils";
 import type { Fact, FactService } from "./types";
 
@@ -8,28 +11,42 @@ const FactDatabaseClient: FactService = {
     knex<Fact>("fact_store")
       .insert(fact)
       .returning("*")
-      .catch(checkDuplicateKeyError),
+      .catch((error) => {
+        console.error("ERROR", error);
+        return checkDuplicateKeyError({ fact })(error);
+      }),
 
   update: ({ id, ...fact }) =>
     knex<Fact>("fact_store")
       .where({ id })
       .update(fact)
       .returning("*")
-      .catch(checkDuplicateKeyError),
+      .catch(checkInvalidInputError({ fact }))
+      .catch(checkDuplicateKeyError({ fact })),
 
   removeById: (id) =>
     knex<Fact>("fact_store")
       .where("id", `${id}`)
       .delete()
-      .then(() => ({ message: `Deleted any fact with an id equal to ${id}` })),
+      .then((count) => ({
+        success: count > 0,
+        count,
+        message: `Deleted any fact with an id equal to ${id}`,
+      })),
 
-  getUniquePathCounts: () =>
-    knex<{path: string, count: string | number}>("fact_store")
+  getPathCounts: () =>
+    knex<Fact>("fact_store")
       .select("path")
       .count("path")
       .groupBy("path")
       .orderBy("count", "desc")
-      .then((rows) => rows.map((row) => ({ path: row.path, count: row.count }))),
+      .then((rows) =>
+        rows.reduce(
+          (results, row) =>
+            Object.assign(results, { [row.path]: row.count as number }),
+          {},
+        ),
+      ),
 
   findFactsByPathKeys: (
     { path, key, limit } = {

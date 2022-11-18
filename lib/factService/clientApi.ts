@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactService } from "./types";
+import type { Fact, FactService, PathCountResults } from "./types";
 
 const FactsConfig = {
   baseUrl: process.env.FACTS_SERVICE_URL ?? "http://localhost:3000/api/facts",
@@ -19,8 +19,8 @@ const FactApiClient: FactService = {
 
   removeById: (id) => client.delete(`/${id}`).then((res) => res.data),
 
-  getUniquePathCounts: () =>
-    client.get<{ path: string; count: number | string }[]>(`/?count=path`).then((res) => res.data),
+  getPathCounts: () =>
+    client.get<PathCountResults>(`/?count=path`).then((res) => res.data),
 
   findFactsByPathKeys: ({ path, key, limit }) =>
     client

@@ -10,14 +10,16 @@ export default router
   .get("/", getPaths)
   .get("/:id", getByIdOrPath)
   .put("/", create)
+  .post("/", create)
+  .post("/:path/:key", update)
   .post("/:id", update)
   .delete("/:id", remove);
 
 // Determine if we are asked to query path counts or a find by path
 function getPaths(request: Request, response: Response, next: NextFunction) {
   if (request.query.count === "path") {
-    return factsDbClient.getUniquePathCounts()
-      .then((facts) => response.status(200).send({ facts }))
+    return factsDbClient.getPathCounts()
+      .then((facts) => response.status(200).send(facts))
       .catch(next);
   }
   return findFactsByPathKeys(request, response, next);
@@ -38,7 +40,7 @@ function findFactsByPathKeys(
   key = `${key}`.split(",");
   factsDbClient
     .findFactsByPathKeys({ path, key, limit, offset, orderBy })
-    .then((facts) => response.status(200).send({ facts }))
+    .then((facts) => response.status(200).send(facts))
     .catch(next);
 }
 
@@ -67,7 +69,7 @@ function create(request: Request, response: Response, next: NextFunction) {
 
   factsDbClient
     .create({ path, key, value })
-    .then((facts) => response.status(201).json({ facts }))
+    .then((facts) => response.status(201).json(facts))
     .catch(next);
 }
 

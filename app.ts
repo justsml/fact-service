@@ -2,9 +2,10 @@
 import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
-// import cors from "cors";
+import cors from "cors";
 import FactRouter from "./lib/factService/router";
 import UserError from "./common/userError";
+import ms from "ms";
 
 const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 
@@ -14,7 +15,7 @@ export default () =>
     .use(express.json())
     .use(express.urlencoded({ extended: false }))
     .use(morgan(logMode))
-    //.use(cors({origin: true, credentials: true})) // Use only if you need CORS
+    .use(cors({origin: true, credentials: true, maxAge: ms('1 month') }))
     .use("/api/facts", FactRouter)
     .use(notFoundHandler)
     .use(errorHandler);
