@@ -9,9 +9,8 @@ export interface Fact {
   created_at?: Date;
   updated_at?: Date;
 }
-
 export type PathCountResults = Record<string, number>;
-export type IdentityType = Fact["id"]; // number | bigint | string;
+export type IdentityType = Fact['id']; // number | bigint | string;
 export type BatchResultMessage = {
   success: boolean;
   message: string;
@@ -23,9 +22,11 @@ export type BatchResultMessage = {
  */
 export interface FactService {
   /** Create a Fact, include `path`, `key`, and `value` */
-  create: (fact: Omit<Fact, "id">) => Promise<Fact[]>;
+  create: (fact: Omit<Fact, 'id'>) => Promise<Fact[]>;
   /** Update a Fact, include `id`, `path`, `key`, and `value` */
-  update: (fact: Fact) => Promise<Fact[]>;
+  updateById: (fact: Fact) => Promise<Fact[]>;
+  /** Update a Fact, include `id`, `path`, `key`, and `value` */
+  updateByPathKey: (updatePathKey: IFactPathKey, fact: Omit<Fact, 'id'>) => Promise<Fact[]>;
   /** Delete a Fact by id */
   removeById: (id: IdentityType) => Promise<BatchResultMessage>;
   /** Group & count unique paths */
@@ -40,7 +41,14 @@ export interface FactService {
   ) => Promise<Fact[]>;
 }
 
+/** For querying many keys for a path */
 export interface IFactServiceQuery {
   path: string;
-  key: string | string[];
+  key: IdentityType | IdentityType[];
+}
+
+/** Singular path + key lookup */
+export interface IFactPathKey {
+  path: string;
+  key: IdentityType;
 }

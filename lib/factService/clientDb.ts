@@ -16,9 +16,17 @@ const FactDatabaseClient: FactService = {
         return checkDuplicateKeyError({ fact })(error);
       }),
 
-  update: ({ id, ...fact }) =>
+  updateById: ({ id, ...fact }) =>
     knex<Fact>("fact_store")
       .where({ id })
+      .update(fact)
+      .returning("*")
+      .catch(checkInvalidInputError({ fact }))
+      .catch(checkDuplicateKeyError({ fact })),
+
+  updateByPathKey: (update, fact) =>
+    knex<Fact>("fact_store")
+      .where({ path: update.path, key: `${update.key}` })
       .update(fact)
       .returning("*")
       .catch(checkInvalidInputError({ fact }))
@@ -59,7 +67,7 @@ const FactDatabaseClient: FactService = {
       .select("*")
       .limit(limit ?? 50)
       .where("path", path)
-      .and.whereIn("key", toArray(key)),
+      .and.whereIn("key", toArray(key) as string[]),
 
   findAllFactsByPath: (
     { path, limit } = {

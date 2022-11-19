@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from "express";
 import factsDbClient from "./clientDb";
 import { getQueryOptions } from "../../common/routeUtils";
 import UserError from "../../common/userError";
+import { BatchResultMessage, IdentityType, IFactServiceQuery } from "./types";
 
 const router = express.Router();
 
@@ -11,14 +12,15 @@ export default router
   .get("/:id", getByIdOrPath)
   .put("/", create)
   .post("/", create)
-  .post("/:path/:key", update)
-  .post("/:id", update)
+  .post("/:path/:key", updateByPathOrId)
+  .post("/:id", updateByPathOrId)
   .delete("/:id", remove);
 
 // Determine if we are asked to query path counts or a find by path
 function getPaths(request: Request, response: Response, next: NextFunction) {
   if (request.query.count === "path") {
-    return factsDbClient.getPathCounts()
+    return factsDbClient
+      .getPathCounts()
       .then((facts) => response.status(200).send(facts))
       .catch(next);
   }
@@ -73,24 +75,82 @@ function create(request: Request, response: Response, next: NextFunction) {
     .catch(next);
 }
 
-function update(request: Request, response: Response, next: NextFunction) {
-  const { id } = request.params;
-  if (id == undefined || `${id}`.length < 1)
-    return next(new UserError("Id is required!"));
-  let { path, key, value } = request.body;
-  if (path == undefined || `${path}`.length < 1)
-    return next(new UserError("Path is required!"));
-  if (key == undefined || `${key}`.length < 1)
-    return next(new UserError("Key is required!"));
+function updateByPathOrId(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+) {
+  const { id, path, key } = request.params;
+  let factsUpdatePromise = null;
+  let update: undefined | Record<string, string> =
+    id != undefined
+      ? { id }
+      : path != undefined && key != undefined
+      ? { path, key }
+      : undefined;
+  let fact = request.body;
+  if (typeof update === "object" && update != null) {
+    const isIdInPath = "id" in update && typeof update.id === "string";
 
-  factsDbClient
-    .update({ id, path, key, value, updated_at: new Date() })
-    .then((updated) =>
-      updated.length >= 1
-        ? response.status(200).json({ updated })
-        : response.status(410).json(),
-    )
-    .catch(next);
+    const isPathKeyInPath = (update: Record<string, string>) =>
+      "path" in update &&
+      typeof update.path === "string" &&
+      "key" in update &&
+      update.key != undefined;
+    if (isPathKeyInPath(update)) {
+      update = { path: update.path, key: update.key };
+      console.log(
+        "Updating fact by [path=%s key=%s] with %o",
+        update.path,
+        update.key,
+        fact,
+      );
+      // Updates any/all of a facts' value by it's *current* path and key
+      factsUpdatePromise = factsDbClient.updateByPathKey(
+        { path, key },
+        {
+          path: fact.path,
+          key: fact.key,
+          value: fact.value,
+          updated_at: new Date(),
+        },
+      );
+    } else if (isIdInPath) {
+      console.log("Updating fact by [id=%s] with %o", update.id, fact);
+      update.id = isIdInPath ? update.id : fact.id;
+      factsUpdatePromise = factsDbClient.updateById({
+        id,
+        path,
+        key,
+        value: fact.value,
+        updated_at: new Date(),
+      });
+    } else {
+      return next(
+        new UserError(
+          "Updates require either a Path & Key, or Id in the path! " +
+            JSON.stringify(request.params),
+        ),
+      );
+    }
+  }
+
+  if (factsUpdatePromise)
+    factsUpdatePromise
+      .then((updated) =>
+        updated.length >= 1
+          ? response.status(200).json({
+              count: updated.length,
+              message: updated.length > 0 ? "success" : "oh noes",
+              success: updated.length > 0,
+            } as BatchResultMessage)
+          : response.status(410).json({
+              success: false,
+              message: "no records updated",
+              count: 0,
+            }),
+      )
+      .catch(next);
 }
 
 function remove(request: Request, response: Response, next: NextFunction) {

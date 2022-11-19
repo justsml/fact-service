@@ -8,14 +8,21 @@ const FactsConfig = {
 
 const client = axios.create({ baseURL: FactsConfig.baseUrl });
 
+const enc = encodeURIComponent;
+
 /**
  * This is the HTTP client for the FactService.
  */
 const FactApiClient: FactService = {
   create: (fact) => client.put(`/`, fact),
 
-  update: ({ id, ...fact }) =>
-    client.post<Fact[]>(`/${id}`, fact).then((res) => res.data),
+  updateById: ({ id, ...fact }) =>
+    client.post<Fact[]>(`/${Number(id)}`, fact).then((res) => res.data),
+
+  updateByPathKey: (update, fact) =>
+    client
+      .post<Fact[]>(`/${enc(update.path)}/${enc(update.key.toString())}`, fact)
+      .then((res) => res.data),
 
   removeById: (id) => client.delete(`/${id}`).then((res) => res.data),
 
