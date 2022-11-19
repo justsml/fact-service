@@ -3,11 +3,10 @@ import express, { Request, Response, NextFunction } from "express";
 import factsDbClient from "./clientDb";
 import { getQueryOptions } from "../../common/routeUtils";
 import UserError from "../../common/userError";
-import { BatchResultMessage, IdentityType, IFactServiceQuery } from "./types";
+import type { BatchResultMessage } from "./types";
 
-const router = express.Router();
-
-export default router
+export default express
+  .Router()
   .get("/", getPaths)
   .get("/:id", getByIdOrPath)
   .put("/", create)
@@ -97,6 +96,7 @@ function updateByPathOrId(
       typeof update.path === "string" &&
       "key" in update &&
       update.key != undefined;
+
     if (isPathKeyInPath(update)) {
       update = { path: update.path, key: update.key };
       console.log(
@@ -135,22 +135,21 @@ function updateByPathOrId(
     }
   }
 
-  if (factsUpdatePromise)
-    factsUpdatePromise
-      .then((updated) =>
-        updated.length >= 1
-          ? response.status(200).json({
-              count: updated.length,
-              message: updated.length > 0 ? "success" : "oh noes",
-              success: updated.length > 0,
-            } as BatchResultMessage)
-          : response.status(410).json({
-              success: false,
-              message: "no records updated",
-              count: 0,
-            }),
-      )
-      .catch(next);
+  Promise.resolve(factsUpdatePromise)
+    .then((updated) =>
+      updated != null && updated?.length >= 1
+        ? response.status(200).json({
+            count: updated.length,
+            message: updated.length > 0 ? "success" : "oh noes",
+            success: updated.length > 0,
+          } as BatchResultMessage)
+        : response.status(410).json({
+            success: false,
+            message: "no records updated",
+            count: 0,
+          }),
+    )
+    .catch(next);
 }
 
 function remove(request: Request, response: Response, next: NextFunction) {
