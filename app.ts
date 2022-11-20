@@ -6,6 +6,7 @@ import cors from "cors";
 import FactRouter from "./lib/factService/router";
 import UserError from "./common/userError";
 import ms from "ms";
+import { verifyTokenMiddleware } from "./lib/auth";
 
 const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 
@@ -16,6 +17,7 @@ export default () =>
     .use(express.urlencoded({ extended: false }))
     .use(morgan(logMode))
     .use(cors({origin: true, credentials: true, maxAge: ms('1 month') }))
+    .use(verifyTokenMiddleware)
     .use("/api/facts", FactRouter)
     .use(notFoundHandler)
     .use(errorHandler);
@@ -37,7 +39,7 @@ function errorHandler(
   const status = error?.status ?? 500;
   response.status(status);
   if (error instanceof UserError || error.name === "UserError") {
-    response.json({ error: error.message });
+    response.status(400).json({ error: error.message });
   } else {
     response.send({ error: error.message, stack, url: request.originalUrl });
   }

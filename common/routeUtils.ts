@@ -40,8 +40,8 @@ export const checkInvalidInputError =
 export const checkDuplicateKeyError =
   <TContextType = unknown>(context: TContextType) =>
   (error: Error) => {
-    if (error.message.includes("duplicate key value violates unique")) {
-      throw new UserError("Fact already exists!");
+    if (error.message.includes("duplicate key")) {
+      throw new UserError(`Fact already exists! Context: ${JSON.stringify(context)}`);
     }
     throw error;
   };

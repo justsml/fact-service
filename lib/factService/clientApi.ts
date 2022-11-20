@@ -3,10 +3,16 @@ import { toArray } from "../../common/arrayUtils";
 import type { Fact, FactService, PathCountResults } from "./types";
 
 const FactsConfig = {
-  baseUrl: process.env.FACTS_SERVICE_URL ?? "http://localhost:3000/api/facts",
+  apiUrl: process.env.API_URL ?? "http://localhost:3000/api/facts",
+  apiToken: process.env.API_TOKEN ?? null,
 };
 
-const client = axios.create({ baseURL: FactsConfig.baseUrl });
+const client = axios.create({
+  baseURL: FactsConfig.apiUrl,
+  headers: {
+    Authorization: `Bearer ${FactsConfig.apiToken}`,
+  },
+});
 
 const enc = encodeURIComponent;
 

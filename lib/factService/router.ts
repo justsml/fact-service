@@ -20,7 +20,7 @@ function getPaths(request: Request, response: Response, next: NextFunction) {
   if (request.query.count === "path") {
     return factsDbClient
       .getPathCounts()
-      .then((facts) => response.status(200).send(facts))
+      .then((facts) => response.status(200).json(facts))
       .catch(next);
   }
   return findFactsByPathKeys(request, response, next);
@@ -41,7 +41,7 @@ function findFactsByPathKeys(
   key = `${key}`.split(",");
   factsDbClient
     .findFactsByPathKeys({ path, key, limit, offset, orderBy })
-    .then((facts) => response.status(200).send(facts))
+    .then((facts) => response.status(200).json(facts))
     .catch(next);
 }
 
@@ -55,7 +55,7 @@ function getByIdOrPath(
     return next(new UserError("Id/Path is required!"));
   factsDbClient
     .findAllFactsByPath({ path: id, limit: 200 })
-    .then((facts) => response.status(200).send(facts))
+    .then((facts) => response.status(200).json(facts))
     .catch(next);
 }
 
@@ -74,13 +74,15 @@ function create(request: Request, response: Response, next: NextFunction) {
     .catch(next);
 }
 
+/**
+ * TODO: Untangle this poor confused function...
+ */
 function updateByPathOrId(
   request: Request,
   response: Response,
   next: NextFunction,
 ) {
   const { id, path, key } = request.params;
-  let factsUpdatePromise = null;
   let update: undefined | Record<string, string> =
     id != undefined
       ? { id }
@@ -88,6 +90,7 @@ function updateByPathOrId(
       ? { path, key }
       : undefined;
   let fact = request.body;
+  let factsUpdatePromise = null;
   if (typeof update === "object" && update != null) {
     const isIdInPath = "id" in update && typeof update.id === "string";
 
