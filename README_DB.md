@@ -32,6 +32,12 @@ npx knex migrate:rollback
 
 ## Seeding
 
+Seed files are used to populate the database with test data.
+
+This can help you "tie" a PR to any necessary data required by a feature - especially for testing.
+
+**Pro Tip:** `Integration Tests + Seeds` are similar in spirit to `Unit tests + Fixtures` (and some mocks.) You can share data between Unit & Integration tests by seeding the DB with your fixtures! When done well, you'll **meaningfully increase confidence** & consistency _regardless of how your testing strategy/needs might evolve._
+
 ### Creating a Seed
 
 To create a seed script, run:
@@ -40,6 +46,9 @@ To create a seed script, run:
 npx knex seed:make 01_retail_locations
 ```
 
+> **IMPORTANT** Note the `01_...` numeric file prefix! Follow this convention to control the sequence seeds will execute.
+
+Once the file is created, I make adjustments for Postgres & my workflow preferences.
 Update the default script to use `.truncate()` instead of `.del()`, for example:
 
 ```js
@@ -48,6 +57,8 @@ Update the default script to use `.truncate()` instead of `.del()`, for example:
  * @returns { Promise<void> } 
  */
 exports.seed = async function(knex) {
+  if (process.env.NODE_ENV === 'production') throw new Error('User Error: DB Seeding disabled in production!');
+
   // Deletes ALL existing entries and resets id sequences
   await knex('table_name').truncate();
 

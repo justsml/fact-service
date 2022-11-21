@@ -13,6 +13,7 @@ const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 export default () =>
   express()
     .use(helmet())
+    .use(express.query({ parseArrays: false }))
     .use(express.json())
     .use(express.urlencoded({ extended: false }))
     .use(morgan(logMode))

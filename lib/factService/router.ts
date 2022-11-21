@@ -4,19 +4,22 @@ import factsDbClient from "./clientDb";
 import { getQueryOptions } from "../../common/routeUtils";
 import UserError from "../../common/userError";
 import type { BatchResultMessage } from "./types";
+import { extractPathAndKeys } from "./factHelpers";
 
 export default express
   .Router()
-  .get("/", getPaths)
-  .get("/:id", getByIdOrPath)
+  // check stats first
+  .get("/stats/:mode?", getFactStats)
+  .get("/:path/:key?", getByIdOrPath)
+  .get("/", findFactsByPathKeys)
   .put("/", create)
-  .post("/", create)
-  .post("/:path/:key", updateByPathOrId)
+  .post("/:path/:key?", updateByPathOrId)
   .post("/:id", updateByPathOrId)
+  .post("/", create)
   .delete("/:id", remove);
 
 // Determine if we are asked to query path counts or a find by path
-function getPaths(request: Request, response: Response, next: NextFunction) {
+function getFactStats(request: Request, response: Response, next: NextFunction) {
   if (request.query.count === "path") {
     return factsDbClient
       .getPathCounts()
@@ -31,32 +34,44 @@ function findFactsByPathKeys(
   response: Response,
   next: NextFunction,
 ) {
+  console.log("findFactsByPathKeys: request.query", request.query);
   const { limit, offset, orderBy } = getQueryOptions(request.query);
-  let { path, key } = request.query;
-  if (path == undefined || `${path}`.length < 1)
-    return next(new UserError("Path is required!"));
-  if (key == undefined || `${key}`.length < 1)
-    return next(new UserError("Key is required!"));
-  path = `${path}`;
-  key = `${key}`.split(",");
+  const { path, key } = extractPathAndKeys(request);
+  
+  // if (path == undefined || `${path}`.length < 1)
+  //   return next(new UserError("Path is required!"));
+  // if (key == undefined || `${key}`.length < 1)
+  //   return next(new UserError("Key is required!"));
   factsDbClient
     .findFactsByPathKeys({ path, key, limit, offset, orderBy })
     .then((facts) => response.status(200).json(facts))
     .catch(next);
 }
 
-function getByIdOrPath(
+async function getByIdOrPath(
   request: Request,
   response: Response,
   next: NextFunction,
 ) {
-  let { id } = request.params;
-  if (id == undefined || `${id}`.length < 1)
-    return next(new UserError("Id/Path is required!"));
+  const { path, key } = extractPathAndKeys(request);
+  if (path == undefined || `${path}`.length < 1)
+    return next(new UserError("Path is required!"));
+  console.log("getByIdOrPath.params", request.params);
+  console.log("getByIdOrPath.query", request.query);
+  console.log({ path, key });
+  if (!key) {
+  console.log('getByIdOrPath.querying', { path });
   factsDbClient
-    .findAllFactsByPath({ path: id, limit: 200 })
-    .then((facts) => response.status(200).json(facts))
-    .catch(next);
+      .findAllFactsByPath({ path: path as string, limit: 200 })
+      .then((facts) => response.status(200).json(facts))
+      .catch(next);
+  } else {
+  console.log('querying', { path, key });
+  factsDbClient
+      .findFactsByPathKeys({ path: `${path}`, key: `${key}`, limit: 10 })
+      .then((facts) => response.status(200).json(facts))
+      .catch(next);
+  }
 }
 
 function create(request: Request, response: Response, next: NextFunction) {

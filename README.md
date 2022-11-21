@@ -1,10 +1,10 @@
 # Fact Service
 
-> Reference Nodejs, TypeScript, Express & Knex Project
+> A Nodejs, TypeScript, Express & Knex Project
 
 - [Overview](#overview)
 - [Getting Started](#getting-started)
-  - [Create `.env` file](#create-env-file)
+  - [Create `.env.local` file](#create-envlocal-file)
   - [Initialize Database](#initialize-database)
   - [Start Service](#start-service)
 - [Testing](#testing)
@@ -12,6 +12,8 @@
   - [Query Facts](#query-facts)
   - [Updating Facts](#updating-facts)
 - [TODO](#todo)
+  - [Features & Patterns](#features--patterns)
+  - [Security & Correctness](#security--correctness)
 
 ## Overview
 
@@ -23,9 +25,17 @@ The rest of this README will get you up and running locally.
 
 ## Getting Started
 
-### Create `.env` file
+### Create `.env.local` file
 
-Copy the `.env.example` to `.env`.
+Copy the `.env.example` to `.env.local`.
+
+```bash
+cp .env.example .env.local
+```
+
+Configure access with the `ALLOWED_TOKENS` environment variable. This is a space-separated set of API tokens that grant access to the service.
+
+Edit any environment variables as needed.
 
 ### Initialize Database
 
@@ -133,8 +143,23 @@ curl --request POST \
 
 ## TODO
 
-- [ ] Add an API method to get stats on unique `paths` with the # of keys per path.
-- [ ] Add Zod Validation.
-- [ ] Add HTTP API Client.
-- [ ] Add HTTP API Tests.
+- [ ] Convert this to yarn workspaces (Monorepo). Add `fact-editor` project, deployment, etc.
+
+### Features & Patterns
+
+- [ ] Add Dockerfile & compose configs.
+  - [ ] Set up ECS + Fargate deployment. (Terraform? CDK? CFN?)
+- [x] Add an API method to get stats on unique `paths` with the # of keys per path.
+  - [ ] Add router for `/stats` to access aggregate stats. Currently, only unique key counts per path are available.
+- [ ] Consider a check restricting reserved paths & prefixes (e.g. `/!operation-name`, `admin`, `stats`, `health`, etc.)
+- [ ] Add Zod Validation?
+- [x] Add example [HTTP API Client.](/lib/factService/clientApi.ts)
 - [ ] Add Integration Tests.
+- [ ] Add unit tests for pure functions.
+
+### Security & Correctness
+
+- [x] Configurable Token / API Key. (for now, use `process.env.ALLOWED_TOKENS`.)
+- [ ] Enforce consistent `path` separators (e.g. `_`, `/` or `.`)
+  - [ ] Configure with `PATH_SEPARATOR` env var.
+  - [ ] Set `PATH_SPLIT_PATTERN` to a char sequence which will be replaced by `PATH_SEPARATOR`.
