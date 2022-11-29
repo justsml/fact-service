@@ -20,13 +20,13 @@ export default express
 
 // Determine if we are asked to query path counts or a find by path
 function getFactStats(request: Request, response: Response, next: NextFunction) {
-  if (request.query.count === "path") {
+  if (request.params.mode === "path-count") {
     return factsDbClient
       .getPathCounts()
       .then((facts) => response.status(200).json(facts))
       .catch(next);
   }
-  return findFactsByPathKeys(request, response, next);
+  return response.status(404).json({message: `Unrecognized mode: ${request.params.mode}`});
 }
 
 function findFactsByPathKeys(

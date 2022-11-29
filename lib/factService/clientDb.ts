@@ -7,8 +7,8 @@ import { toArray } from "../../common/arrayUtils";
 import type { Fact, FactService } from "./types";
 
 const FactDatabaseClient: FactService = {
-  create: (fact) =>
-    knex<Fact>("fact_store")
+  create: async (fact) =>
+    await knex<Fact>("fact_store")
       .insert(fact)
       .returning("*")
       .catch((error) => {
@@ -16,24 +16,24 @@ const FactDatabaseClient: FactService = {
         return checkDuplicateKeyError({ fact })(error);
       }),
 
-  updateById: ({ id, ...fact }) =>
-    knex<Fact>("fact_store")
+  updateById: async ({ id, ...fact }) =>
+    await knex<Fact>("fact_store")
       .where({ id })
       .update(fact)
       .returning("*")
       .catch(checkInvalidInputError({ fact }))
       .catch(checkDuplicateKeyError({ fact })),
 
-  updateByPathKey: (update, fact) =>
-    knex<Fact>("fact_store")
+  updateByPathKey: async (update, fact) =>
+    await knex<Fact>("fact_store")
       .where({ path: update.path, key: `${update.key}` })
       .update(fact)
       .returning("*")
       .catch(checkInvalidInputError({ fact }))
       .catch(checkDuplicateKeyError({ fact })),
 
-  removeById: (id) =>
-    knex<Fact>("fact_store")
+  removeById: async (id) =>
+    await knex<Fact>("fact_store")
       .where("id", `${id}`)
       .delete()
       .then((count) => ({
@@ -42,8 +42,8 @@ const FactDatabaseClient: FactService = {
         message: `Deleted any fact with an id equal to ${id}`,
       })),
 
-  getPathCounts: () =>
-    knex<Fact>("fact_store")
+  getPathCounts: async () =>
+    await knex<Fact>("fact_store")
       .select("path")
       .count("path")
       .groupBy("path")
@@ -56,26 +56,26 @@ const FactDatabaseClient: FactService = {
         ),
       ),
 
-  findFactsByPathKeys: (
+  findFactsByPathKeys: async (
     { path, key, limit } = {
       path: "",
       key: "",
       limit: 50,
     },
   ) =>
-    knex<Fact>("fact_store")
+    await knex<Fact>("fact_store")
       .select("*")
       .limit(limit ?? 50)
       .where("path", path)
       .and.whereIn("key", toArray(key) as string[]),
 
-  findAllFactsByPath: (
+  findAllFactsByPath: async (
     { path, limit } = {
       path: "",
       limit: 250,
     },
   ) =>
-    knex<Fact>("fact_store")
+    await knex<Fact>("fact_store")
       .select("*")
       .limit(limit ?? 250)
       .where("path", path),
