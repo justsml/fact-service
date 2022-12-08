@@ -8,7 +8,6 @@ const config = easyConfig({
   databaseUrl: ["--db", "DATABASE_URL", "DATABASE_URI"],
   pathSeparator: ["--pathSeparator", "PATH_SEPARATOR"],
   pathSplitPattern: ["--pathSplitPattern", "PATH_SPLIT_PATTERN"],
-  // "apiUrl": ['--url', '--apiUrl', 'API_URL'],
 });
 
 // export default config;

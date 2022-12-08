@@ -12,6 +12,7 @@ const config = {
     databaseUrl || "postgres://postgres:postgres@localhost:5432/postgres",
   migrations: { directory: "./db/migrations" },
   seeds: { directory: "./db/seeds" },
+  // debug: true,
 };
 
 module.exports = {
