@@ -11,9 +11,9 @@ export default express
   // check stats first
   .get("/stats/:mode?", getFactStats)
   .get("/:path/:key?", getByIdOrPath)
+  .post("/:path/:key?", updateByPathOrId)
   .get("/", findFactsByPathKeys)
   .put("/", create)
-  .post("/:path/:key?", updateByPathOrId)
   .post("/:id", updateByPathOrId)
   .post("/", create)
   .delete("/:id", remove);
