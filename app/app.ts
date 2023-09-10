@@ -1,5 +1,12 @@
 /* credit: https://github.com/justsml/guides/tree/master/express/setup-guide */
-import express, { application, Request, Response, NextFunction, Handler, Application } from "express";
+import express, {
+  application,
+  Request,
+  Response,
+  NextFunction,
+  Handler,
+  Application,
+} from "express";
 import ms from "ms";
 import morgan from "morgan";
 import helmet from "helmet";
@@ -7,7 +14,9 @@ import cors from "cors";
 import UserError from "../common/userError";
 import FactRouter from "../lib/factService/router";
 import { verifyTokenMiddleware } from "../middleware/auth";
-import { extractRoutes } from "../lib/extractRoutes";
+import extractRoutes from "../lib/extractRoutes";
+import { expressOpenApi } from "../lib/openApi/setup";
+import openApp from "../lib/openApi";
 
 const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 
@@ -27,22 +36,36 @@ const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 // };
 
 // application.use = _customUse;
-
-export default () =>
-  express()
-    .use(helmet())
-    .use(express.query({ parseArrays: false }))
-    .use(express.json())
-    .use(express.urlencoded({ extended: false }))
-    .use(morgan(logMode))
-    .use(cors({origin: true, credentials: true, maxAge: ms('1 month') }))
-    .use(verifyTokenMiddleware)
-    .use("/api/facts", FactRouter)
-    .use("/v1/api/facts", FactRouter)
-    .get("/", (req, res) => res.send({ ok: true, message: "Hello World!" }))
-    .get("/_healthcheck", (req, res) => res.send({ ok: true }))
-    .use(notFoundHandler)
-    .use(errorHandler);
+export default () => {
+  const app = expressOpenApi({
+    title: "Test",
+    description: "This is a test",
+    version: "1.0.0",
+    contact: {
+      name: "Test",
+      email: "dan@danlevy.net",
+      url: "https://danlevy.net",
+    },
+    tags: {
+      test: "Test",
+    },
+  })
+  
+    return app
+      .use(helmet())
+      .use(express.query({ parseArrays: false }))
+      .use(express.json())
+      .use(express.urlencoded({ extended: false }))
+      .use(morgan(logMode))
+      .use(cors({ origin: true, credentials: true, maxAge: ms("1 month") }))
+      .use(verifyTokenMiddleware)
+      .use("/api/facts", FactRouter)
+      .use("/v1/api/facts", FactRouter)
+      .get("/", (req, res) => res.send({ ok: true, message: "Hello World!" }))
+      .get("/_healthcheck", (req, res) => res.send({ ok: true }))
+      .use(notFoundHandler)
+      .use(errorHandler);
+}
 
 function notFoundHandler(request: Request, response: Response) {
   response

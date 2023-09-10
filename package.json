@@ -45,7 +45,9 @@
     "lodash": "^4.17.21",
     "morgan": "^1.10.0",
     "pg": "^8.8.0",
-    "swagger-jsdoc": "^6.2.8"
+    "swagger-jsdoc": "^6.2.8",
+    "zod": "^3.22.2",
+    "zod-to-json-schema": "^3.21.4"
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",

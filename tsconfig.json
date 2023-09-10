@@ -5,7 +5,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
-    "baseUrl": ".",
+    "rootDir": ".",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": false,
@@ -20,7 +20,8 @@
     "declaration": true,
     "declarationMap": true,
     "strict": true,
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "typeRoots": ["./node_modules/@types", "./types"],
   },
   "include": ["./**/*.ts", "./**/*.tsx", "./**/*.js", "./**/*.jsx"],
   "exclude": ["**/node_modules", "**/.*/", "dist"]

@@ -1,4 +1,5 @@
-import { Application } from "express";
+import { Application, IRoute, IRouter, Router } from "express";
+import { sortBy } from "lodash";
 
 const defaultOptions = {
   logger: console.info,
@@ -27,7 +28,7 @@ function combineStacks(acc: string[], stack: unknown) {
   return [...acc, stack];
 }
 
-function getStacks(app: Application) {
+export function getStacks(app: Application) {
   // Express 3
   if (app.routes) {
     // convert to express 4
@@ -61,16 +62,14 @@ function getStacks(app: Application) {
 }
 
 // @ts-expect-error
-export function extractRoutes(app, opts) {
+export default function extractRoutes(app, opts) {
   const stacks = getStacks(app);
   const options = { ...defaultOptions, ...opts };
   const paths = [];
 
   if (stacks) {
     for (const stack of stacks) {
-      // if (stack.path) {
-      //   console.warn("STACK.PATH", stack.path);
-      // }
+      // Exclude middlewares - i.e. require route, and method (below)
       if (stack.route) {
         const routeLogged = {};
 
@@ -107,5 +106,5 @@ export function extractRoutes(app, opts) {
     }
   }
 
-  return paths;
+  return sortBy(paths, ["path", "method"]);
 }

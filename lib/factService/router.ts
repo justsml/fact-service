@@ -5,13 +5,28 @@ import { getQueryOptions } from "../../common/routeUtils";
 import UserError from "../../common/userError";
 import type { BatchResultMessage } from "./types";
 import { extractPathAndKeys } from "./factHelpers";
+import { z } from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
+import { openApiRouter } from "../openApi/setup";
 
-export default express
-  .Router()
+export default openApiRouter()
   // check stats first
   .get("/stats/:mode?", getFactStats)
   .get("/:path/:key?", getByIdOrPath)
+  .openApi({
+    summary: `Update fact(s) by path (and key)`,
+    requestPayload: {
+      schema: z.object({
+        path: z.string().min(1),
+        key: z.string().min(1),
+        value: z.string().min(1),
+      })}
+    })
   .post("/:path/:key?", updateByPathOrId)
+  .openApi({
+    summary: `Get fact stats`,
+    tags: ["facts", "read"],
+  })
   .get("/", findFactsByPathKeys)
   .put("/", create)
   .post("/:id", updateByPathOrId)
