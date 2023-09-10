@@ -36,7 +36,8 @@ export function openApiRouter() {
 
 const openApi = function openApi(this: Router, opts: OpenApiOptions) {
   this._openApiList = this._openApiList || [];
-
+  const stack = getStacks(this as unknown as Application);
+  console.log('', this.stack)
   this._openApiList.push(opts);
   console.log("OpenApi:", opts);
   return this;

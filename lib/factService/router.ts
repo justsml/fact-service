@@ -20,8 +20,9 @@ export default openApiRouter()
         path: z.string().min(1),
         key: z.string().min(1),
         value: z.string().min(1),
-      })}
-    })
+      }),
+    },
+  })
   .post("/:path/:key?", updateByPathOrId)
   .openApi({
     summary: `Get fact stats`,
@@ -34,14 +35,20 @@ export default openApiRouter()
   .delete("/:id", remove);
 
 // Determine if we are asked to query path counts or a find by path
-function getFactStats(request: Request, response: Response, next: NextFunction) {
+function getFactStats(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+) {
   if (request.params.mode === "path-count") {
     return factsDbClient
       .getPathCounts()
       .then((facts) => response.status(200).json(facts))
       .catch(next);
   }
-  return response.status(404).json({message: `Unrecognized mode: ${request.params.mode}`});
+  return response
+    .status(404)
+    .json({ message: `Unrecognized mode: ${request.params.mode}` });
 }
 
 function findFactsByPathKeys(
@@ -52,7 +59,7 @@ function findFactsByPathKeys(
   console.log("findFactsByPathKeys: request.query", request.query);
   const { limit, offset, orderBy } = getQueryOptions(request.query);
   const { path, key } = extractPathAndKeys(request);
-  
+
   // if (path == undefined || `${path}`.length < 1)
   //   return next(new UserError("Path is required!"));
   // if (key == undefined || `${key}`.length < 1)
@@ -75,14 +82,14 @@ async function getByIdOrPath(
   console.log("getByIdOrPath.query", request.query);
   console.log({ path, key });
   if (!key) {
-  console.log('getByIdOrPath.querying', { path });
-  factsDbClient
+    console.log("getByIdOrPath.querying", { path });
+    factsDbClient
       .findAllFactsByPath({ path: path as string, limit: 200 })
       .then((facts) => response.status(200).json(facts))
       .catch(next);
   } else {
-  console.log('querying', { path, key });
-  factsDbClient
+    console.log("querying", { path, key });
+    factsDbClient
       .findFactsByPathKeys({ path: `${path}`, key: `${key}`, limit: 10 })
       .then((facts) => response.status(200).json(facts))
       .catch(next);
