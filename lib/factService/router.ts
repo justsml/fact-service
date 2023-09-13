@@ -15,13 +15,21 @@ export default openApiRouter()
   .get("/:path/:key?", getByIdOrPath)
   .openApi({
     summary: `Update fact(s) by path (and key)`,
-    requestPayload: {
-      schema: z.object({
-        path: z.string().min(1),
-        key: z.string().min(1),
-        value: z.string().min(1),
-      }),
-    },
+    version: "1.0.0",
+    params: [{
+      ":path": "string",
+      ":key?": "string",
+    }]
+    tags: ["facts", "write"],
+    // requestPayload: {
+    //   schema: zodToJsonSchema(
+    //     z.object({
+    //       path: z.string().min(1),
+    //       key: z.string().min(1),
+    //       value: z.string().min(1),
+    //     }),
+    //   ),
+    // },
   })
   .post("/:path/:key?", updateByPathOrId)
   .openApi({

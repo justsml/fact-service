@@ -1,6 +1,6 @@
 import express, { Express, Application, Router } from "express";
 import extractRoutes, { getStacks } from "../extractRoutes";
-import type { OpenApiGlobals, OpenApiOptions } from "./extendExpress";
+import type { OpenApiGlobals, OpenApiRouteOptions } from "./extendExpress";
 
 /**
  * Replace the default express app with this method to add OpenApi support.
@@ -34,10 +34,15 @@ export function openApiRouter() {
   return router;
 }
 
-const openApi = function openApi(this: Router, opts: OpenApiOptions) {
+const openApi = function openApi(this: Router, opts: OpenApiRouteOptions) {
   this._openApiList = this._openApiList || [];
   const stack = getStacks(this as unknown as Application);
-  console.log('', this.stack)
+  const routes = extractRoutes(this as unknown as Application, {
+    skipSort: true,
+  });
+
+  console.info("Routes:", routes.length, routes[routes.length - 1]);
+  // console.log('Stack len', stack.length, stack[stack.length - 1]);
   this._openApiList.push(opts);
   console.log("OpenApi:", opts);
   return this;

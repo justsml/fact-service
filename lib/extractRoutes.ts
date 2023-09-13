@@ -3,7 +3,56 @@ import { sortBy } from "lodash";
 
 const defaultOptions = {
   logger: console.info,
+  skipSort: Boolean,
 };
+
+// @ts-expect-error
+export default function extractRoutes(app, opts) {
+  const stacks = getStacks(app);
+  const options = { ...defaultOptions, ...opts };
+  const paths = [];
+
+  if (stacks) {
+    for (const stack of stacks) {
+      // Exclude middlewares - i.e. require route, and method (below)
+      if (stack.route) {
+        const routeLogged = {};
+
+        for (const route of stack.route.stack) {
+          const method = route.method ? route.method.toUpperCase() : null;
+          const handlerName = route.name ? route.name : null;
+          const handler = route?.handle;
+          // @ts-expect-error
+          if (!routeLogged[method] && method) {
+            const stackMethod = method;
+            const stackPath = [
+              options.prefix?.replace(/^\//, ""),
+              stack.routerPath?.replace(/^\//, "")?.replace(/\/$/, ""),
+              stack.route.path?.replace(/^\//, "").replace(/\/$/, ""),
+              route.path?.replace(/^\//, ""),
+            ]
+              .filter(Boolean)
+              .join("/")
+              .trim();
+            const p = stackPath[0] === "/" ? stackPath : `/${stackPath}`;
+            options.logger(stackMethod, p, handlerName);
+            paths.push({
+              method,
+              path: p,
+              keys: stack.keys.map(({ name }: { name: string }) => name),
+              handlerName,
+              handler,
+            });
+            // @ts-expect-error
+            routeLogged[method] = true;
+          }
+        }
+      }
+    }
+  }
+  if (options?.skipSort) return paths;
+  return sortBy(paths, ["path", "method"]);
+}
 
 function getPathFromRegex(regexp: string) {
   return regexp
@@ -59,52 +108,4 @@ export function getStacks(app: Application) {
   }
 
   return [];
-}
-
-// @ts-expect-error
-export default function extractRoutes(app, opts) {
-  const stacks = getStacks(app);
-  const options = { ...defaultOptions, ...opts };
-  const paths = [];
-
-  if (stacks) {
-    for (const stack of stacks) {
-      // Exclude middlewares - i.e. require route, and method (below)
-      if (stack.route) {
-        const routeLogged = {};
-
-        for (const route of stack.route.stack) {
-          const method = route.method ? route.method.toUpperCase() : null;
-          const handlerName = route.name ? route.name : null;
-          const handler = route?.handle;
-          // @ts-expect-error
-          if (!routeLogged[method] && method) {
-            const stackMethod = method;
-            const stackPath = [
-              options.prefix?.replace(/^\//, ""),
-              stack.routerPath?.replace(/^\//, "")?.replace(/\/$/, ""),
-              stack.route.path?.replace(/^\//, "").replace(/\/$/, ""),
-              route.path?.replace(/^\//, ""),
-            ]
-              .filter(Boolean)
-              .join("/")
-              .trim();
-            const p = stackPath[0] === "/" ? stackPath : `/${stackPath}`;
-            options.logger(stackMethod, p, handlerName);
-            paths.push({
-              method,
-              path: p,
-              keys: stack.keys.map(({ name }: { name: string }) => name),
-              handlerName,
-              handler,
-            });
-            // @ts-expect-error
-            routeLogged[method] = true;
-          }
-        }
-      }
-    }
-  }
-
-  return sortBy(paths, ["path", "method"]);
 }
