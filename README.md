@@ -12,8 +12,8 @@
   - [Query Facts](#query-facts)
   - [Updating Facts](#updating-facts)
 - [TODO](#todo)
-  - [Features & Patterns](#features--patterns)
-  - [Security & Correctness](#security--correctness)
+  - [Features \& Patterns](#features--patterns)
+  - [Security \& Correctness](#security--correctness)
 
 ## Overview
 
@@ -77,6 +77,7 @@ npm start
 curl --request PUT \
   --url http://127.0.0.1:3000/api/facts \
   --header 'Content-Type: application/json' \
+  --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
   "path": "user",
   "key": "456",
@@ -88,6 +89,7 @@ curl --request PUT \
 curl --request PUT \
   --url http://127.0.0.1:3000/api/facts \
   --header 'Content-Type: application/json' \
+  --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
   "path": "user",
   "key": "789",
@@ -101,6 +103,7 @@ curl --request PUT \
 
 ```sh
 curl --request GET \
+  --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --url 'http://127.0.0.1:3000/api/facts?path=user&key=123%2C456'
 ```
 
@@ -108,6 +111,7 @@ curl --request GET \
 
 ```sh
 curl --request GET \
+  --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --url 'http://127.0.0.1:3000/api/facts?count=path'
 ```
 
@@ -117,6 +121,7 @@ Finds all Facts matching the path `user`.
 
 ```sh
 curl --request GET \
+  --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --url http://127.0.0.1:3000/api/facts/user
 ```
 
@@ -124,6 +129,7 @@ Finds all Facts matching the path `user/overrides`.
 
 ```sh
 curl --request GET \
+  --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --url http://127.0.0.1:3000/api/facts/user%2Foverrides
 # Note the URI Escaped path: user%2Foverrides (i.e. user/overrides)
 ```

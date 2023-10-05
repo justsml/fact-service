@@ -10,7 +10,7 @@ const config = {
   client: "pg",
   connection:
     databaseUrl || "postgres://postgres:postgres@localhost:5432/postgres",
-  migrations: { directory: "./db/migrations" },
+  migrations: { directory: "./db/migrations", tableName: "knex_migrations_facts" },
   seeds: { directory: "./db/seeds" },
   // debug: true,
 };
