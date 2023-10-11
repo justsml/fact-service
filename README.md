@@ -112,7 +112,14 @@ curl --request GET \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:3000/api/facts?count=path'
+  --url 'http://127.0.0.1:3000/api/facts/stats/path-count'
+```
+
+```json
+{
+  "user": "3",
+  "user_credits": "2"
+}
 ```
 
 #### Get all Facts matching a path
