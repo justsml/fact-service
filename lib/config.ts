@@ -1,13 +1,18 @@
 import { easyConfig } from "@elite-libs/auto-config";
-import { escapeRegExp } from "lodash";
+// import { escapeRegExp } from "lodash";
 
 const config = easyConfig({
   env: ["FACTS_ENV", "NODE_ENV"],
   port: ["--port", "-p", "PORT"],
   allowedTokens: ["--allowedTokens", "ALLOWED_TOKENS"],
   databaseUrl: ["--db", "DATABASE_URL", "DATABASE_URI"],
-  pathSeparator: ["--pathSeparator", "PATH_SEPARATOR"],
-  pathSplitPattern: ["--pathSplitPattern", "PATH_SPLIT_PATTERN"],
+  redisUrl: ["--redis", "REDIS_URL", "REDIS_URI"],
+  dynamoDbUrl: ["--dynamoDb", "DYNAMODB_URL", "DYNAMODB_URI"],
+  firestoreUrl: ["--firestore", "FIRESTORE_URL", "FIRESTORE_URI"],
+  cassandraUrl: ["--cassandra", "CASSANDRA_URL", "CASSANDRA_URI"],
+  foundationDbUrl: ["--foundationDb", "FOUNDATION_DB_URL", "FOUNDATION_URL"],
+  // pathSeparator: ["--pathSeparator", "PATH_SEPARATOR"],
+  // pathSplitPattern: ["--pathSplitPattern", "PATH_SPLIT_PATTERN"],
 });
 
 // export default config;
@@ -19,12 +24,18 @@ export const allowedTokens = _parseTokenList(config.allowedTokens);
 export const env = config.env;
 export const port = Number(config.port);
 export const databaseUrl = config.databaseUrl;
+export const redisUrl = config.redisUrl;
+export const dynamoDbUrl = config.dynamoDbUrl;
+export const firestoreUrl = config.firestoreUrl;
+export const cassandraUrl = config.cassandraUrl;
+export const foundationDbUrl = config.foundationDbUrl;
 
-export const pathSeparator = config.pathSeparator ?? ".";
-export const pathSplitPattern =
-  `${config.pathSplitPattern}`.length >= 2
-    ? new RegExp(escapeRegExp(config.pathSplitPattern), "mig")
-    : /\./gim;
+
+// export const pathSeparator = config.pathSeparator ?? ".";
+// export const pathSplitPattern =
+//   `${config.pathSplitPattern}`.length >= 2
+//     ? new RegExp(escapeRegExp(config.pathSplitPattern), "mig")
+//     : /\./gim;
 
 if (allowedTokens.length <= 0)
   throw new Error(`ALLOWED_TOKENS is empty. Check config or .env file.`);

@@ -3,15 +3,15 @@ import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
-import factsPgClient from "./lib/factStores/postgres";
-import FactRouter from "./lib/factService/router";
+import factsPgClient from "./lib/providers/postgres";
+import {factApiRouter} from "./lib/factService/router";
 import UserError from "./common/userError";
 import ms from "ms";
 import { verifyTokenMiddleware } from "./lib/auth";
 
 const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 
-const factRouter = FactRouter(factsPgClient);
+const factRouter = factApiRouter(factsPgClient);
 
 export default () =>
   express()

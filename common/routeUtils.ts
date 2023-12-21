@@ -1,10 +1,10 @@
 import UserError from "./userError";
 
-export interface IQueryParameters {
-  limit?: number;
-  offset?: number;
-  orderBy?: [string, "asc" | "desc"];
-}
+// export interface IQueryParameters {
+//   limit?: number;
+//   offset?: number;
+//   orderBy?: [string, "asc" | "desc"];
+// }
 
 export function getQueryOptions(
   query: {
@@ -28,6 +28,15 @@ export function getQueryOptions(
   return { offset, limit, orderBy: orderByPair };
 }
 
+export const checkPostgresError =
+  <TContextType = unknown>(context: TContextType) =>
+  (error: Error) => {
+    checkInvalidInputError(context)(error);
+    checkDuplicateKeyError(context)(error);
+    checkRelationError(context)(error);
+    throw error;
+  };
+
 export const checkInvalidInputError =
   <TContextType = unknown>(context: TContextType) =>
   (error: Error) => {
@@ -41,7 +50,23 @@ export const checkDuplicateKeyError =
   <TContextType = unknown>(context: TContextType) =>
   (error: Error) => {
     if (error.message.includes("duplicate key")) {
-      throw new UserError(`Fact already exists! Context: ${JSON.stringify(context)}`);
+      throw new UserError(
+        `Fact already exists! Context: ${JSON.stringify(context)}`,
+      );
+    }
+    throw error;
+  };
+
+export const checkRelationError =
+  <TContextType = unknown>(context: TContextType) =>
+  (error: Error) => {
+    if (error.message.includes("of relation")) {
+      const msg = error.message
+        .split(" - column")[1]
+        .replace("relation", "table");
+      throw new UserError(
+        `Database error: ${msg}. Context: ${JSON.stringify(context)}`,
+      );
     }
     throw error;
   };

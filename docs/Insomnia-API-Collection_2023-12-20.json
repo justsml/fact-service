@@ -441,7 +441,7 @@ resources:
     created: 1667177779641
     name: Base Environment
     data:
-      baseUrl: http://localhost:8080
+      baseUrl: http://localhost:4000
       token: tahjisheiPaa9taem3oo
     dataPropertyOrder:
       "&":
@@ -478,7 +478,7 @@ resources:
     created: 1667177837798
     name: FactService
     data:
-      baseUrl: http://localhost:8080
+      baseUrl: http://localhost:4000
     dataPropertyOrder:
       "&":
         - baseUrl

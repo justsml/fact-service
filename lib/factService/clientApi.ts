@@ -20,30 +20,24 @@ const enc = encodeURIComponent;
  * This is the HTTP client for the FactService.
  */
 const FactApiClient: FactAdapter = {
-  create: (fact) => client.put(`/`, fact),
+  set: (fact) => client.put(`/`, fact).then((res) => res.data),
 
-  updateById: ({ id, ...fact }) =>
-    client.post<Fact[]>(`/${Number(id)}`, fact).then((res) => res.data),
+  get: ({ key }) =>
+    client.get<Fact>(`/${encodeURIComponent(key)}`).then((res) => res.data),
 
-  updateByPathKey: (update, fact) =>
+  // updateByPathKey: (update, fact) =>
+  //   client
+  //     .post<Fact[]>(`/${enc(update.path)}/${enc(update.key.toString())}`, fact)
+  //     .then((res) => res.data),
+
+  del: ({ key }) => client.delete(`/${key}`).then((res) => res.data),
+
+  // getPathCounts: () =>
+  //   client.get<PathCountResults>(`/?count=path`).then((res) => res.data),
+
+  find: ({ keyPrefix }) =>
     client
-      .post<Fact[]>(`/${enc(update.path)}/${enc(update.key.toString())}`, fact)
-      .then((res) => res.data),
-
-  removeById: (id) => client.delete(`/${id}`).then((res) => res.data),
-
-  getPathCounts: () =>
-    client.get<PathCountResults>(`/?count=path`).then((res) => res.data),
-
-  findFactsByPathKeys: ({ path, key, limit }) =>
-    client
-      .get<Fact[]>(`/`, {
-        params: {
-          path,
-          key: toArray(key),
-          limit: limit ?? 50,
-        },
-      })
+      .get<Fact[]>(`/?keyPrefix=${enc(keyPrefix)}`)
       .then((res) => res.data),
 
   findAllFactsByPath: ({ path, limit }) =>

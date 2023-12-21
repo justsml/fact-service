@@ -3,15 +3,10 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
-  if (await knex.schema.hasTable("fact_store")) return;
-
-  return knex.schema.createTable("fact_store", (table) => {
-    table.bigIncrements("id").primary();
-    table.string("path", 256).notNullable();
-    table.string("key", 64).notNullable();
+  return knex.schema.createTableIfNotExists("fact_store", (table) => {
+    table.string("key", 500).primary();
     table.jsonb("value");
     table.timestamps(true, true);
-    table.unique(["path", "key"]);
   });
 };
 

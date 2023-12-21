@@ -39,6 +39,8 @@ Edit any environment variables as needed.
 
 ### Initialize Database
 
+#### Create a Postgres Database
+
 ```sh
 mkdir -p $HOME/.postgres-data
 docker run \
@@ -55,6 +57,38 @@ docker run \
     -c 'shared_memory_type=sysv' \
     -c 'shared_buffers=256MB' \
     -c 'max_connections=200'
+```
+
+#### Start Redis Database (Optional)
+
+DragonflyDB is a Redis-compatible database that can be used as a drop-in replacement for Redis.
+
+```sh
+docker run --name fact-svc-dragonfly \
+  --detach \
+  -p 6379:6379 --ulimit memlock=-1 \
+  docker.dragonflydb.io/dragonflydb/dragonfly
+```
+
+#### Start Local DynamoDB (Optional)
+
+```sh
+docker run --name fact-svc-dynamodb \
+  --detach \
+  -p 8000:8000 \
+  amazon/dynamodb-local
+  
+```
+
+#### Start Local Firestore (Optional)
+
+```sh
+docker run --name fact-svc-firestore \
+  --detach \
+  -p 8080:8080 \
+  -e FIRESTORE_PROJECT_ID=${FIRESTORE_PROJECT_ID:-fact-svc} \
+  google/cloud-sdk:latest \
+  gcloud beta emulators firestore start --host-port=${HOST_PORT}
 ```
 
 ### Start Service
@@ -75,7 +109,7 @@ npm start
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:8080/api/facts/user:456 \
+  --url http://127.0.0.1:4000/api/facts/user:456 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -87,7 +121,7 @@ curl --request PUT \
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:8080/api/facts/user:789 \
+  --url http://127.0.0.1:4000/api/facts/user:789 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -104,7 +138,7 @@ curl --request PUT \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:8080/api/facts/user?matchSuffix=456,789'
+  --url 'http://127.0.0.1:4000/api/facts/user?matchSuffix=456,789'
 ```
 
 #### Get the count for every unique path
@@ -112,7 +146,7 @@ curl --request GET \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:8080/api/stats/path-count'
+  --url 'http://127.0.0.1:4000/api/stats/path-count'
 ```
 
 ```json
@@ -129,7 +163,7 @@ Finds all Facts matching the path `user`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:8080/api/facts/user
+  --url http://127.0.0.1:4000/api/facts/user
 ```
 
 Finds all Facts matching the path `user/overrides`.
@@ -137,7 +171,7 @@ Finds all Facts matching the path `user/overrides`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:8080/api/facts/user%2Foverrides
+  --url http://127.0.0.1:4000/api/facts/user%2Foverrides
 # Note the URI Escaped path: user%2Foverrides (i.e. user/overrides)
 ```
 
@@ -145,7 +179,7 @@ curl --request GET \
 
 ```sh
 curl --request POST \
-  --url http://127.0.0.1:8080/api/facts/3 \
+  --url http://127.0.0.1:4000/api/facts/3 \
   --header 'Content-Type: application/json' \
   --data '{
   "path": "user",
