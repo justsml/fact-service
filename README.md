@@ -194,14 +194,15 @@ curl --request POST \
 - [x] Example of simple CLI w/ Bash ([View CLI Source](/bin/fact-cli))
 - [ ] Simplify Key/Path pattern. (e.g. `['user', 123]` -> `user:123`)
 - [ ] Add `FactStore` interface & implementations.
-  - [ ] Postgres
-  - [ ] Redis
-  - [ ] DynamoDB
+  - [x] Postgres
+  - [x] Redis
+  - [x] DynamoDB
   - [ ] Firestore
   - [ ] FoundationDB
   - [ ] Cassandra
 - [ ] Convert to workspace (Monorepo).
   - [ ] Add `fact-editor` project, deployment, etc.
+- [ ] Make native ESM all the way through.
 
 ### Features & Patterns
 

@@ -1,9 +1,9 @@
-import knex from "../../db/knex";
-import { checkPostgresError}  from "../../common/routeUtils";
-import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactAdapter } from "../factService/types";
+import knex from "../../../db/knex";
+import { checkPostgresError}  from "../../../common/routeUtils";
+import { toArray } from "../../../common/arrayUtils";
+import type { Fact, FactAdapter } from "../../factService/types";
 
-const FactPostgresAdapter: FactAdapter = {
+export const PostgresAdapter: FactAdapter = {
   set: async (fact) =>
     await knex<Fact>("fact_store")
       .insert(fact)
@@ -74,5 +74,3 @@ const FactPostgresAdapter: FactAdapter = {
   //     .limit(limit ?? 250)
   // .where("path", path),
 };
-
-export default FactPostgresAdapter;

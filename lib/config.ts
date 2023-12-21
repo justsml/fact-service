@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { easyConfig } from "@elite-libs/auto-config";
 // import { escapeRegExp } from "lodash";
 

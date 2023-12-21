@@ -1,28 +1,20 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
 import express, { Request, Response, NextFunction } from "express";
-// import { getQueryOptions } from "../../common/routeUtils";
 import UserError from "../../common/userError";
-import { createTable } from "../providers/dynamoDb";
+import { createTable, dropTable } from "../providers/dynamoDb/adapter";
 import type { BatchResultMessage, FactAdapter } from "./types";
-// import { getKeyFromParamsOrQuery } from "./factHelpers";
-
-// TODO: Cleanup
-// Example Express Path Patterns:
-// /api/:path([A-Za-z0-9\/\-_'":;,\.\[\]$#@!%^&*+={}<>?|]{0,})
-// /:key([A-Za-z0-9\/\-@#$:.=]{0,})
-// /:id([0-9]{1,})
-// /:key([.]{0,})
 
 const keyPathPattern = "/:key([a-zA-Z0-9-:/]{0,})";
 
-createTable();
+// dropTable().then(() => console.log("Table dropped!"));
+// createTable().then(() => console.log("Table created!"));
 
 export function factApiRouter(factsDbClient: FactAdapter) {
   return express
     .Router()
     .get(keyPathPattern, getById)
     .put(keyPathPattern, create)
-    .post(keyPathPattern, update)
+    .post(keyPathPattern, create)
     .delete(keyPathPattern, remove);
 
   async function getById(
@@ -31,13 +23,15 @@ export function factApiRouter(factsDbClient: FactAdapter) {
     next: NextFunction,
   ) {
     const { key } = request.params;
+    const { keyPrefix } = request.query;
+
     console.log("getById(%s)", key);
     if (!key) return next(new UserError("Key is required!"));
 
-    if (key !== "/" && key.length < 1) {
-      const { keyPrefix } = request.query;
-      if (!keyPrefix || `${keyPrefix}`.length < 1) return next(new UserError("keyPrefix is required! e.g. ?keyPrefix=user"));
-      return factsDbClient.find({ keyPrefix: `${keyPrefix}` });
+    if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
+      return factsDbClient.find({ keyPrefix: `${keyPrefix}` })
+      .then((facts) => response.status(200).json(facts))
+      .catch(next);
     }
 
     factsDbClient
@@ -63,40 +57,12 @@ export function factApiRouter(factsDbClient: FactAdapter) {
   /**
    * TODO: Untangle this poor confused function...
    */
-  async function update(
-    request: Request,
-    response: Response,
-    next: NextFunction,
-  ) {
-    const { key } = request.params;
-    let fact = request.body;
-
-    // Updates any/all of a facts' value by it's *current* path and key
-    const updatedRow = await factsDbClient.set({ key, fact });
-
-    Promise.resolve(updatedRow)
-      .then((row) => {
-        const updated = Array.isArray(row) ? row : [row];
-        return updated != null && Array.isArray(updated)
-          ? response.status(200).json({
-              count: updated.length,
-              message: updated.length > 0 ? "success" : "oh noes",
-              success: updated.length > 0,
-            } as BatchResultMessage)
-          : response.status(410).json({
-              success: false,
-              message: "no records updated",
-              count: 0,
-            });
-      })
-      .catch(next);
-  }
-
   function remove(request: Request, response: Response, next: NextFunction) {
     const { key } = request.params;
     if (key == undefined || `${key}`.length < 1)
       return next(new UserError("key is required!"));
 
+    console.log("Removing %s", key);
     factsDbClient
       .del({ key })
       .then((deleted) =>

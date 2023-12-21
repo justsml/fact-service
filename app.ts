@@ -3,7 +3,8 @@ import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
-import factsPgClient from "./lib/providers/postgres";
+// import factsPgClient from "./lib/providers/postgres/adapter";
+import {DynamoAdapter} from "./lib/providers/dynamoDb/adapter";
 import {factApiRouter} from "./lib/factService/router";
 import UserError from "./common/userError";
 import ms from "ms";
@@ -11,7 +12,7 @@ import { verifyTokenMiddleware } from "./lib/auth";
 
 const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
 
-const factRouter = factApiRouter(factsPgClient);
+const factRouter = factApiRouter(DynamoAdapter);
 
 export default () =>
   express()

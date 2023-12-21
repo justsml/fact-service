@@ -1,6 +1,6 @@
 import axios from "axios";
-import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactAdapter, PathCountResults } from "./types";
+// import { toArray } from "../../common/arrayUtils";
+import type { Fact, FactAdapter } from "./types";
 
 const FactsConfig = {
   apiUrl: process.env.API_URL ?? "http://localhost:3000/api/facts",
@@ -40,14 +40,14 @@ const FactApiClient: FactAdapter = {
       .get<Fact[]>(`/?keyPrefix=${enc(keyPrefix)}`)
       .then((res) => res.data),
 
-  findAllFactsByPath: ({ path, limit }) =>
-    client
-      .get<Fact[]>(`/${encodeURIComponent(path)}`, {
-        params: {
-          limit: limit ?? 250,
-        },
-      })
-      .then((res) => res.data),
+  // findAllFactsByPath: ({ path, limit }) =>
+  //   client
+  //     .get<Fact[]>(`/${encodeURIComponent(path)}`, {
+  //       params: {
+  //         limit: limit ?? 250,
+  //       },
+  //     })
+  //     .then((res) => res.data),
 };
 
 export default FactApiClient;
