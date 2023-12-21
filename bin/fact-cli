@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CLI_HELP='fact-cli is a command-line tool for working with a fact-service API.
+
+Usage:
+
+fact-cli get {key}
+fact-cli set {key} {json}
+fact-cli delete {key}
+fact-cli list [keyPrefix]
+fact-cli find {keyPrefix} [suffixList]
+fact-cli find {keyPrefix} [suffixList] [--limit n]
+
+Options:
+
+-h, --help     output usage information
+-v, --version  output the version number'
+
+# check for help & version flags
+[[ "${1:-}" == "--help" || "${1:-}" == "-h" ]] && echo "$CLI_HELP" && exit 0
+[[ "${1:-}" == "--version" || "${1:-}" == "-v" ]] && echo "v1.0.1" && exit 0
+
+function get() {
+  local key=${1:-}
+
+  [[ -z "$key" ]] && echo "key is required" && exit 1
+
+  curl --request GET \
+    --url "$FACT_SERVICE_URL/api/facts/$key" \
+    --header "Content-Type: application/json" \
+    --header "X-token: $FACT_SERVICE_TOKEN"
+}
+
+function set_fact() {
+  local key=${1:-}
+  local payload=${2:-}
+
+  [[ -z "$key" ]] && echo "key is required" && exit 1
+
+  curl --request PUT \
+    --url "$FACT_SERVICE_URL/api/facts/$key" \
+    --data "$payload" \
+    --header "Content-Type: application/json" \
+    --header "X-token: $FACT_SERVICE_TOKEN"
+}
+
+function delete() {
+  local key=${1:-}
+
+  [[ -z "$key" ]] && echo "key is required" && exit 1
+
+  curl --request DELETE \
+    --url "$FACT_SERVICE_URL/api/facts/$key" \
+    --header "Content-Type: application/json" \
+    --header "X-token: $FACT_SERVICE_TOKEN"
+}
+
+function list() {
+  local keyPrefix=${1:-}
+
+  [[ -z "$keyPrefix" ]] && echo "All facts" || echo "By prefix: $keyPrefix"
+
+  curl --request GET \
+    --url "$FACT_SERVICE_URL/api/facts?prefix=$keyPrefix" \
+    --header "Content-Type: application/json" \
+    --header "X-token: $FACT_SERVICE_TOKEN"
+}
+
+FACT_SERVICE_TOKEN="${FACT_SERVICE_TOKEN:-}"
+
+# Validate that the FACT_SERVICE_URL, FACT_SERVICE_TOKEN environment variables is set.
+if [[ -z "${FACT_SERVICE_URL:-}" ]]; then
+  echo "FACT_SERVICE_URL environment variable is not set."
+  printf "Set in your shell profile or run: \n\nexport FACT_SERVICE_URL=http://localhost:8080\n"
+  exit 1
+fi
+
+if [[ -z "${FACT_SERVICE_TOKEN:-}" ]]; then
+  echo "FACT_SERVICE_TOKEN environment variable is not set."
+  printf "Set in your shell profile or run: \n\nexport FACT_SERVICE_TOKEN=secret\n"
+  exit 1
+fi
+
+commandArg=${1:-}
+keyArg=${2:-}
+payloadArg=${3:-}
+suffixListArg=${4:-}
+limitArg=${5:-}
+
+case "$commandArg" in
+"get")
+  [[ -z "$keyArg" ]] && echo "key is required" && exit 1
+  get "$keyArg"
+  ;;
+"set")
+  [[ -z "$keyArg" ]] && echo "key is required" && exit 1
+  [[ -z "$payloadArg" ]] && echo "payload is required" && exit 1
+  set_fact "$keyArg" "$payloadArg"
+  ;;
+"delete")
+  [[ -z "$keyArg" ]] && echo "key is required" && exit 1
+  delete "$keyArg"
+  ;;
+"list")
+  list "$keyArg"
+  ;;
+"find")
+  [[ -z "$keyArg" ]] && echo "keyPrefix is required" && exit 1
+  search "$keyArg" "$suffixListArg" "$limitArg"
+  ;;
+*)
+
+  printf "Invalid command: %s!\n\n" "$commandArg"
+  printf "%s\n" "$CLI_HELP"
+
+  exit 1
+  ;;
+esac

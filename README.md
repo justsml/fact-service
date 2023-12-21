@@ -75,7 +75,7 @@ npm start
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:3000/api/facts \
+  --url http://127.0.0.1:8080/api/facts/user:456 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -87,7 +87,7 @@ curl --request PUT \
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:3000/api/facts \
+  --url http://127.0.0.1:8080/api/facts/user:789 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -104,7 +104,7 @@ curl --request PUT \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:3000/api/facts?path=user&key=123%2C456'
+  --url 'http://127.0.0.1:8080/api/facts/user?matchSuffix=456,789'
 ```
 
 #### Get the count for every unique path
@@ -112,7 +112,7 @@ curl --request GET \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:3000/api/facts/stats/path-count'
+  --url 'http://127.0.0.1:8080/api/stats/path-count'
 ```
 
 ```json
@@ -129,7 +129,7 @@ Finds all Facts matching the path `user`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:3000/api/facts/user
+  --url http://127.0.0.1:8080/api/facts/user
 ```
 
 Finds all Facts matching the path `user/overrides`.
@@ -137,7 +137,7 @@ Finds all Facts matching the path `user/overrides`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:3000/api/facts/user%2Foverrides
+  --url http://127.0.0.1:8080/api/facts/user%2Foverrides
 # Note the URI Escaped path: user%2Foverrides (i.e. user/overrides)
 ```
 
@@ -145,7 +145,7 @@ curl --request GET \
 
 ```sh
 curl --request POST \
-  --url http://127.0.0.1:3000/api/facts/3 \
+  --url http://127.0.0.1:8080/api/facts/3 \
   --header 'Content-Type: application/json' \
   --data '{
   "path": "user",
@@ -157,6 +157,7 @@ curl --request POST \
 ## TODO
 
 - [ ] Add Elysia server example.
+- [x] Example of simple CLI w/ Bash ([View CLI Source](/bin/fact-cli))
 - [ ] Simplify Key/Path pattern. (e.g. `['user', 123]` -> `user:123`)
 - [ ] Add `FactStore` interface & implementations.
   - [ ] Postgres

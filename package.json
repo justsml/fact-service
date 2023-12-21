@@ -1,8 +1,11 @@
 {
   "name": "fact-service",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Enhanced Key-Value lookup service. Uses Nodejs, TypeScript, Express & Knex Project.",
   "main": "index.js",
+  "bin": {
+    "fact-cli": "./bin/fact-cli"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/justsml/fact-service.git"
@@ -11,7 +14,11 @@
   "scripts": {
     "start": "nodemon --watch './**/*.ts' --exec 'ts-node' index.ts",
     "test": "jest",
-    "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,css,scss,md}'"
+    "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
+    "cli:get": "./bin/fact-cli get",
+    "cli:set": "./bin/fact-cli set",
+    "cli:del": "./bin/fact-cli del",
+    "cli:list": "./bin/fact-cli list"
   },
   "keywords": [
     "key-value",
