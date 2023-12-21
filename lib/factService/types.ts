@@ -20,7 +20,7 @@ export type BatchResultMessage = {
 /**
  * The FactService interface helps our http & database clients stay aligned.
  */
-export interface FactService {
+export interface FactAdapter {
   /** Create a Fact, include `path`, `key`, and `value` */
   create: (fact: Omit<Fact, 'id'>) => Promise<Fact[]>;
   /** Update a Fact, include `id`, `path`, `key`, and `value` */

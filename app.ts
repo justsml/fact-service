@@ -3,12 +3,15 @@ import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors";
+import factsPgClient from "./lib/factStores/postgres";
 import FactRouter from "./lib/factService/router";
 import UserError from "./common/userError";
 import ms from "ms";
 import { verifyTokenMiddleware } from "./lib/auth";
 
 const logMode = process.env.NODE_ENV !== "production" ? "dev" : "combined";
+
+const factRouter = FactRouter(factsPgClient);
 
 export default () =>
   express()
@@ -19,7 +22,7 @@ export default () =>
     .use(morgan(logMode))
     .use(cors({origin: true, credentials: true, maxAge: ms('1 month') }))
     .use(verifyTokenMiddleware)
-    .use("/api/facts", FactRouter)
+    .use("/api/facts", factRouter)
     .use(notFoundHandler)
     .use(errorHandler);
 

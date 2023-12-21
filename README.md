@@ -156,12 +156,22 @@ curl --request POST \
 
 ## TODO
 
-- [ ] Convert this to yarn workspaces (Monorepo). Add `fact-editor` project, deployment, etc.
+- [ ] Add Elysia server example.
+- [ ] Simplify Key/Path pattern. (e.g. `['user', 123]` -> `user:123`)
+- [ ] Add `FactStore` interface & implementations.
+  - [ ] Postgres
+  - [ ] Redis
+  - [ ] DynamoDB
+  - [ ] Firestore
+  - [ ] FoundationDB
+  - [ ] Cassandra
+- [ ] Convert to workspace (Monorepo).
+  - [ ] Add `fact-editor` project, deployment, etc.
 
 ### Features & Patterns
 
 - [ ] Add Dockerfile & compose configs.
-  - [ ] Set up ECS + Fargate deployment. (Terraform? CDK? CFN?)
+  - [ ] Set up ECS + Fargate deployment. (Terraform? CDK? CF?)
 - [ ] Make API more RESTful.
   - [ ] Use `PUT` & `POST` (`PATCH`?) for creating and updating Facts.
   - [ ] Use `GET` for querying Facts.

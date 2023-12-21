@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactService, PathCountResults } from "./types";
+import type { Fact, FactAdapter, PathCountResults } from "./types";
 
 const FactsConfig = {
   apiUrl: process.env.API_URL ?? "http://localhost:3000/api/facts",
@@ -19,7 +19,7 @@ const enc = encodeURIComponent;
 /**
  * This is the HTTP client for the FactService.
  */
-const FactApiClient: FactService = {
+const FactApiClient: FactAdapter = {
   create: (fact) => client.put(`/`, fact),
 
   updateById: ({ id, ...fact }) =>

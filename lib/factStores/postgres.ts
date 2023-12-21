@@ -4,9 +4,9 @@ import {
   checkInvalidInputError,
 } from "../../common/routeUtils";
 import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactService } from "./types";
+import type { Fact, FactAdapter } from "../factService/types";
 
-const FactDatabaseClient: FactService = {
+const FactDatabaseClient: FactAdapter = {
   create: async (fact) =>
     await knex<Fact>("fact_store")
       .insert(fact)
