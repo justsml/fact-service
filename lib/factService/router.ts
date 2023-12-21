@@ -1,13 +1,14 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
 import express, { Request, Response, NextFunction } from "express";
+import { logger } from "../../common/logger";
 import UserError from "../../common/userError";
-import { createTable, dropTable } from "../providers/dynamoDb/adapter";
-import type { BatchResultMessage, FactAdapter } from "./types";
+// import { createTable, dropTable } from "../providers/dynamoDb/adapter";
+import type { FactAdapter } from "./types";
 
 const keyPathPattern = "/:key([a-zA-Z0-9-:/]{0,})";
 
-// dropTable().then(() => console.log("Table dropped!"));
-// createTable().then(() => console.log("Table created!"));
+// dropTable().then(() => logger.log("Table dropped!"));
+// createTable().then(() => logger.log("Table created!"));
 
 export function factApiRouter(factsDbClient: FactAdapter) {
   return express
@@ -25,10 +26,11 @@ export function factApiRouter(factsDbClient: FactAdapter) {
     const { key } = request.params;
     const { keyPrefix } = request.query;
 
-    console.log("getById(%s)", key);
-    if (!key) return next(new UserError("Key is required!"));
+    logger.debug("getById(%s)", key);
+    if (!key && !keyPrefix) return next(new UserError("Key is required!"));
 
     if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
+      logger.debug("getByPrefix(%s*)", keyPrefix);
       return factsDbClient.find({ keyPrefix: `${keyPrefix}` })
       .then((facts) => response.status(200).json(facts))
       .catch(next);
@@ -62,7 +64,7 @@ export function factApiRouter(factsDbClient: FactAdapter) {
     if (key == undefined || `${key}`.length < 1)
       return next(new UserError("key is required!"));
 
-    console.log("Removing %s", key);
+    logger.debug("Removing %s", key);
     factsDbClient
       .del({ key })
       .then((deleted) =>

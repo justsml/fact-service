@@ -80,6 +80,13 @@ docker run --name fact-svc-dynamodb \
   
 ```
 
+#### Start Local Cassandra (Optional)
+
+```sh
+docker network create cassandra
+docker run --rm -d --name cassandra --hostname cassandra --network cassandra cassandra
+```
+
 #### Start Local Firestore (Optional)
 
 ```sh
@@ -90,6 +97,18 @@ docker run --name fact-svc-firestore \
   google/cloud-sdk:latest \
   gcloud beta emulators firestore start --host-port=${HOST_PORT}
 ```
+
+#### Start Local ClickHouse Server (Optional)
+
+```sh
+docker run -d --name clickhouse-server \
+  --cap-add=SYS_NICE \
+  --cap-add=IPC_LOCK \
+  --ulimit nofile=262144:262144 \
+  -p 8123:8123 -p 9000:9000 -p 9009:9009 -p 9363:9363 \
+  clickhouse/clickhouse-server:23.2
+```
+
 
 ### Start Service
 
@@ -190,6 +209,8 @@ curl --request POST \
 
 ## TODO
 
+- [ ] Add integration tests.
+- [ ] Add benchmark scripts.
 - [ ] Add Elysia server example.
 - [x] Example of simple CLI w/ Bash ([View CLI Source](/bin/fact-cli))
 - [ ] Simplify Key/Path pattern. (e.g. `['user', 123]` -> `user:123`)
@@ -200,6 +221,9 @@ curl --request POST \
   - [ ] Firestore
   - [ ] FoundationDB
   - [ ] Cassandra
+  - [ ] S3?
+  - [ ] ClickHouse
+  - [ ] ???
 - [ ] Convert to workspace (Monorepo).
   - [ ] Add `fact-editor` project, deployment, etc.
 - [ ] Make native ESM all the way through.

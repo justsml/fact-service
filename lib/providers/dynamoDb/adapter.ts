@@ -5,10 +5,12 @@ import {
 } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
+  DeleteCommand,
   PutCommand,
   QueryCommand,
-  DeleteCommand,
+  ScanCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { logger } from "../../../common/logger";
 import { dynamoDbUrl } from "../../config";
 import type { Fact, FactAdapter } from "../../factService/types";
 
@@ -28,7 +30,7 @@ export const DynamoAdapter: FactAdapter = {
       TIMESTAMP: Date.now(),
       KEY: key,
     };
-    console.log("DynamoAdapter.set", Item);
+    logger.debug("DynamoAdapter.set", Item);
     return docClient
       .send(
         new PutCommand({
@@ -38,7 +40,7 @@ export const DynamoAdapter: FactAdapter = {
         }),
       )
       .then((result) => {
-        console.log("PutCommand result", result);
+        logger.debug("PutCommand result", result);
         return result.Attributes as Fact
       });
   },
@@ -68,7 +70,7 @@ export const DynamoAdapter: FactAdapter = {
       )
       .then((result) => {
 
-        console.log("DeleteCommand result", result);
+        logger.debug("DeleteCommand result", result);
         return {
           success: !!result.Attributes,
           count: 1,
@@ -78,21 +80,27 @@ export const DynamoAdapter: FactAdapter = {
   },
 
   find: async ({ keyPrefix }) => {
-    console.log("DynamoAdapter.find", keyPrefix);
+    logger.debug("DynamoAdapter.find", keyPrefix);
     return docClient
       .send(
-        new QueryCommand({
+        new ScanCommand({
           TableName: FACT_STORE_TABLE_NAME,
-          // KeyConditionExpression: "begins_with(#k, :k)",
+          FilterExpression: "begins_with(#k, :k)",
           ExpressionAttributeNames: { "#k": "KEY" },
           ExpressionAttributeValues: { ":k": keyPrefix },
-          QueryFilter: {
-            "KEY": {
-              ComparisonOperator: "BEGINS_WITH",
-              AttributeValueList: [keyPrefix],
-            },
-          },
-        }),
+        })
+        // new QueryCommand({
+        //   TableName: FACT_STORE_TABLE_NAME,
+        //   // KeyConditionExpression: "begins_with(#k, :k)",
+        //   ExpressionAttributeNames: { "#k": "KEY" },
+        //   ExpressionAttributeValues: { ":k": keyPrefix },
+        //   QueryFilter: {
+        //     "KEY": {
+        //       ComparisonOperator: "BEGINS_WITH",
+        //       AttributeValueList: [keyPrefix],
+        //     },
+        //   },
+        // }),
       )
       .then((result) => result.Items as Fact[]);
   },

@@ -1,4 +1,30 @@
+import { Request, Response, NextFunction } from "express";
+import { logger } from "./logger";
 import UserError from "./userError";
+
+
+export function notFoundHandler(request: Request, response: Response) {
+  response
+    .status(404)
+    .send({ error: "Not found!", status: 404, url: request.originalUrl });
+}
+
+export function errorHandler(
+  error: Error & { status?: number },
+  request: Request,
+  response: Response,
+  next: NextFunction,
+) {
+  logger.error("ERROR", error);
+  const stack = process.env.NODE_ENV !== "production" ? error.stack : undefined;
+  const status = error?.status ?? 500;
+  response.status(status);
+  if (error instanceof UserError || error.name === "UserError") {
+    response.status(400).json({ error: error.message });
+  } else {
+    response.send({ error: error.message, stack, url: request.originalUrl });
+  }
+}
 
 // export interface IQueryParameters {
 //   limit?: number;
@@ -40,7 +66,7 @@ export const checkPostgresError =
 export const checkInvalidInputError =
   <TContextType = unknown>(context: TContextType) =>
   (error: Error) => {
-    console.error("ERROR", error);
+    logger.error("ERROR", error);
     const msg = error.message;
     const lastPart = msg.split(`invalid input`)[1];
     if (lastPart) throw new UserError(`Database Error: ${lastPart}`);
