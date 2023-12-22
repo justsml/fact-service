@@ -64,13 +64,13 @@ export function factApiRouter(factsDbClient: FactAdapter) {
     if (key == undefined || `${key}`.length < 1)
       return next(new UserError("key is required!"));
 
-    logger.debug("Removing %s", key);
+    logger.info("Removing %s", key);
     factsDbClient
       .del({ key })
       .then((deleted) =>
-        deleted.message
-          ? response.status(204).json(deleted.message)
-          : response.status(404).json({ message: "Nothing deleted!" }),
+        deleted.count > 0
+          ? response.status(204).json(deleted)
+          : response.status(404).json({ message: "Key not found!" }),
       )
       .catch(next);
   }

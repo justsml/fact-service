@@ -5,6 +5,7 @@
 - [Overview](#overview)
 - [Getting Started](#getting-started)
   - [Create `.env.local` file](#create-envlocal-file)
+- [Test Database Integrations](#test-database-integrations)
   - [Initialize Database](#initialize-database)
   - [Start Service](#start-service)
 - [Testing](#testing)
@@ -36,6 +37,15 @@ cp .env.example .env.local
 Configure access with the `ALLOWED_TOKENS` environment variable. This is a space-separated set of API tokens that grant access to the service.
 
 Edit any environment variables as needed.
+
+## Test Database Integrations
+
+```sh
+yarn test:pg
+yarn test:redis
+yarn test:dynamo
+yarn test:cassandra
+```
 
 ### Initialize Database
 
@@ -83,8 +93,9 @@ docker run --name fact-svc-dynamodb \
 #### Start Local Cassandra (Optional)
 
 ```sh
-docker network create cassandra
-docker run --rm -d --name cassandra --hostname cassandra --network cassandra cassandra
+docker run -d --name cassandra \
+  --hostname cassandra \
+  cassandra
 ```
 
 #### Start Local Firestore (Optional)
@@ -209,9 +220,9 @@ curl --request POST \
 
 ## TODO
 
-- [ ] Add integration tests.
-- [ ] Add benchmark scripts.
 - [ ] Add Elysia server example.
+- [x] Add integration tests.
+- [x] Add benchmark scripts.
 - [x] Example of simple CLI w/ Bash ([View CLI Source](/bin/fact-cli))
 - [ ] Simplify Key/Path pattern. (e.g. `['user', 123]` -> `user:123`)
 - [ ] Add `FactStore` interface & implementations.

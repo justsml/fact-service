@@ -131,7 +131,7 @@ export const DynamoAdapter: FactAdapter = {
 
 /**
  * Temp helper to create a table in DynamoDB */
-export const createTable = async () => {
+export const setupDynamo = async () => {
   return await dynamoDbClient.send(
     new CreateTableCommand({
       TableName: FACT_STORE_TABLE_NAME,
@@ -168,7 +168,7 @@ export const createTable = async () => {
   );
 };
 
-export const dropTable = async () => {
+export const cleanupDynamo = async () => {
   return await dynamoDbClient.send(
     new DeleteTableCommand({
       TableName: FACT_STORE_TABLE_NAME,

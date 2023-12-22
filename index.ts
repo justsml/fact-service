@@ -9,5 +9,5 @@ const app = App();
 
 app
   .listen(port)
-  .on("error", logger.error)
+  .on("error", logger.error.bind(logger))
   .on("listening", () => logger.info(startMessage));

@@ -7,6 +7,8 @@ const config = easyConfig({
   env: ["FACTS_ENV", "NODE_ENV"],
   port: ["--port", "-p", "PORT"],
   allowedTokens: ["--allowedTokens", "ALLOWED_TOKENS"],
+  
+  debugMode: ["--debug", "DEBUG_MODE"],
 
   // Dynamic DB_ADAPTER var controls which DB adapter is used
   dbAdapter: ["--dbAdapter", "DB_ADAPTER"],
@@ -21,6 +23,8 @@ const config = easyConfig({
   // pathSeparator: ["--pathSeparator", "PATH_SEPARATOR"],
   // pathSplitPattern: ["--pathSplitPattern", "PATH_SPLIT_PATTERN"],
 });
+
+export { config as siteConfig };
 
 // export default config;
 

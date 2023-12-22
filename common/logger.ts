@@ -4,7 +4,8 @@ import pretty from "pino-pretty";
 
 export const logStream = pretty({
   colorize: true,
-  singleLine: true,  
+  singleLine: true,
+  ignore: "res.headers",
 });
 
 export const logger = pino(logStream);

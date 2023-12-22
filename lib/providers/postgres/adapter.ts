@@ -7,7 +7,7 @@ import { logger } from "../../../common/logger";
 export const PostgresAdapter: FactAdapter = {
   set: async (fact) =>
     await knex<Fact>("fact_store")
-      .insert(fact)
+      .insert({ ...fact, updated_at: new Date() })
       .onConflict("key")
       .merge()
       .returning("*")
@@ -28,18 +28,21 @@ export const PostgresAdapter: FactAdapter = {
 
   del: async ({ key }) =>
     await knex<Fact>("fact_store")
-      .whereIn("key", toArray(key))
+      // .whereIn("key", toArray(key))
+      .where({ key: key })
       .delete()
-      .then((count) => ({
-        success: count > 0,
-        count,
-        message: `Deleted any fact with an id equal to ${key}`,
-      })),
+      .then((count) => {
+        // console.log("delete.result:", count);
+        return {
+          success: count > 0,
+          count,
+          message: `Deleted any fact with an id equal to ${key}`,
+        };
+      }),
 
   find: async ({ keyPrefix }) =>
     await knex<Fact>("fact_store")
       .select("*")
       .whereILike("key", knex.raw(`concat(?::text, '%')`, keyPrefix))
       .then((rows) => rows as Fact[]),
-
 };
