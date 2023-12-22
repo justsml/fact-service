@@ -1,188 +1,100 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
 import express, { Request, Response, NextFunction } from "express";
-import factsDbClient from "./clientDb";
-import { getQueryOptions } from "../../common/routeUtils";
+import { logger } from "../../common/logger";
 import UserError from "../../common/userError";
-import type { BatchResultMessage } from "./types";
-import { extractPathAndKeys } from "./factHelpers";
+// import { createTable, dropTable } from "../providers/dynamoDb/adapter";
+import type { FactAdapter } from "./types";
 
-export default express
-  .Router()
-  // check stats first
-  .get("/stats/:mode?", getFactStats)
-  .get("/:path/:key?", getByIdOrPath)
-  .get("/", findFactsByPathKeys)
-  .put("/", create)
-  .post("/:path/:key?", updateByPathOrId)
-  .post("/:id", updateByPathOrId)
-  .post("/", create)
-  .delete("/:id", remove);
+const keyPathPattern = "/:key([a-zA-Z0-9-:/]{0,})";
 
-// Determine if we are asked to query path counts or a find by path
-function getFactStats(request: Request, response: Response, next: NextFunction) {
-  if (request.params.mode === "path-count") {
-    return factsDbClient
-      .getPathCounts()
+// dropTable().then(() => logger.log("Table dropped!"));
+// createTable().then(() => logger.log("Table created!"));
+
+export function factApiRouter(factsDbClient: FactAdapter) {
+  return express
+    .Router()
+    .get(keyPathPattern, getById)
+    .put(keyPathPattern, create)
+    .post(keyPathPattern, create)
+    .delete(keyPathPattern, remove);
+
+  async function getById(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    const { key } = request.params;
+    const { keyPrefix } = request.query;
+
+    logger.debug("getById(%s)", key);
+    if (!key && !keyPrefix) return next(new UserError("Key is required!"));
+
+    if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
+      logger.debug("getByPrefix(%s*)", keyPrefix);
+      return factsDbClient.find({ keyPrefix: `${keyPrefix}` })
       .then((facts) => response.status(200).json(facts))
       .catch(next);
-  }
-  return response.status(404).json({message: `Unrecognized mode: ${request.params.mode}`});
-}
-
-function findFactsByPathKeys(
-  request: Request,
-  response: Response,
-  next: NextFunction,
-) {
-  console.log("findFactsByPathKeys: request.query", request.query);
-  const { limit, offset, orderBy } = getQueryOptions(request.query);
-  const { path, key } = extractPathAndKeys(request);
-  
-  // if (path == undefined || `${path}`.length < 1)
-  //   return next(new UserError("Path is required!"));
-  // if (key == undefined || `${key}`.length < 1)
-  //   return next(new UserError("Key is required!"));
-  factsDbClient
-    .findFactsByPathKeys({ path, key, limit, offset, orderBy })
-    .then((facts) => response.status(200).json(facts))
-    .catch(next);
-}
-
-async function getByIdOrPath(
-  request: Request,
-  response: Response,
-  next: NextFunction,
-) {
-  const { path, key } = extractPathAndKeys(request);
-  if (path == undefined || `${path}`.length < 1)
-    return next(new UserError("Path is required!"));
-  console.log("getByIdOrPath.params", request.params);
-  console.log("getByIdOrPath.query", request.query);
-  console.log({ path, key });
-  if (!key) {
-  console.log('getByIdOrPath.querying', { path });
-  factsDbClient
-      .findAllFactsByPath({ path: path as string, limit: 200 })
-      .then((facts) => response.status(200).json(facts))
-      .catch(next);
-  } else {
-  console.log('querying', { path, key });
-  factsDbClient
-      .findFactsByPathKeys({ path: `${path}`, key: `${key}`, limit: 10 })
-      .then((facts) => response.status(200).json(facts))
-      .catch(next);
-  }
-}
-
-function create(request: Request, response: Response, next: NextFunction) {
-  let { path, key, value } = request.body;
-  if (path == undefined || `${path}`.length < 1)
-    return next(new UserError("Path is required!"));
-  if (key == undefined || `${key}`.length < 1)
-    return next(new UserError("Key is required!"));
-  if (value == undefined || `${value}`.length < 1)
-    return next(new UserError("Value is required!"));
-
-  factsDbClient
-    .create({ path, key, value })
-    .then((facts) => response.status(201).json(facts))
-    .catch(next);
-}
-
-/**
- * TODO: Untangle this poor confused function...
- */
-function updateByPathOrId(
-  request: Request,
-  response: Response,
-  next: NextFunction,
-) {
-  const { id, path, key } = request.params;
-  let update: undefined | Record<string, string> =
-    id != undefined
-      ? { id }
-      : path != undefined && key != undefined
-      ? { path, key }
-      : undefined;
-  let fact = request.body;
-  let factsUpdatePromise = null;
-  if (typeof update === "object" && update != null) {
-    const isIdInPath = "id" in update && typeof update.id === "string";
-
-    const isPathKeyInPath = (update: Record<string, string>) =>
-      "path" in update &&
-      typeof update.path === "string" &&
-      "key" in update &&
-      update.key != undefined;
-
-    if (isPathKeyInPath(update)) {
-      update = { path: update.path, key: update.key };
-      console.log(
-        "Updating fact by [path=%s key=%s] with %o",
-        update.path,
-        update.key,
-        fact,
-      );
-      // Updates any/all of a facts' value by it's *current* path and key
-      factsUpdatePromise = factsDbClient.updateByPathKey(
-        { path, key },
-        {
-          path: fact.path,
-          key: fact.key,
-          value: fact.value,
-          updated_at: new Date(),
-        },
-      );
-    } else if (isIdInPath) {
-      console.log("Updating fact by [id=%s] with %o", update.id, fact);
-      update.id = isIdInPath ? update.id : fact.id;
-      factsUpdatePromise = factsDbClient.updateById({
-        id,
-        path,
-        key,
-        value: fact.value,
-        updated_at: new Date(),
-      });
-    } else {
-      return next(
-        new UserError(
-          "Updates require either a Path & Key, or Id in the path! " +
-            JSON.stringify(request.params),
-        ),
-      );
     }
+
+    factsDbClient
+      .get({ key })
+      .then((facts) => response.status(200).json(facts))
+      .catch(next);
   }
 
-  Promise.resolve(factsUpdatePromise)
-    .then((updated) =>
-      updated != null && updated?.length >= 1
-        ? response.status(200).json({
-            count: updated.length,
-            message: updated.length > 0 ? "success" : "oh noes",
-            success: updated.length > 0,
-          } as BatchResultMessage)
-        : response.status(410).json({
-            success: false,
-            message: "no records updated",
-            count: 0,
-          }),
-    )
-    .catch(next);
+  function create(request: Request, response: Response, next: NextFunction) {
+    const { key } = request.params;
+    const { ...payload } = request.body;
+    if (key == undefined || `${key}`.length < 1)
+      return next(new UserError("Key is required!"));
+    if (payload == undefined || `${payload}`.length < 1)
+      return next(new UserError("payload is required!"));
+
+    factsDbClient
+      .set({ key, fact: payload })
+      .then((facts) => response.status(201).json(facts))
+      .catch(next);
+  }
+
+  /**
+   * TODO: Untangle this poor confused function...
+   */
+  function remove(request: Request, response: Response, next: NextFunction) {
+    const { key } = request.params;
+    if (key == undefined || `${key}`.length < 1)
+      return next(new UserError("key is required!"));
+
+    logger.info("Removing %s", key);
+    factsDbClient
+      .del({ key })
+      .then((deleted) =>
+        deleted.count > 0
+          ? response.status(204).json(deleted)
+          : response.status(404).json({ message: "Key not found!" }),
+      )
+      .catch(next);
+  }
 }
 
-function remove(request: Request, response: Response, next: NextFunction) {
-  const { id } = request.params;
-  if (id == undefined || `${id}`.length < 1)
-    return next(new UserError("Id is required!"));
+export function statsApiRouter(factsDbClient: FactAdapter) {
+  return express
+    .Router()
+    .route("/stats/:mode?")
+    .get((req, res) => res.status(420).json({ message: "Not implemented!" }));
 
-  factsDbClient
-    .removeById(BigInt(id))
-    .then((deleted) =>
-      deleted.message
-        ? response.status(204).json(deleted.message)
-        : response.status(404).json({ message: "Nothing deleted!" }),
-    )
-    .catch(next);
+  // function getFactStats(
+  //   request: Request,
+  //   response: Response,
+  //   next: NextFunction,
+  // ) {
+  //   if (request.params.mode === "path-count") {
+  //     return factsDbClient
+  //       .getPathCounts()
+  //       .then((facts) => response.status(200).json(facts))
+  //       .catch(next);
+  //   }
+  //   return response
+  //     .status(404)
+  //     .json({ message: `Unrecognized mode: ${request.params.mode}` });
+  // }
 }
-
-// `/modules/facts/api.{js,ts}`
