@@ -17,6 +17,12 @@ Assorted database adapters for storing facts.
 1. Set adapter specific environment variables.
 1. Start the server.
 
+### TIP
+
+```sh
+export LOG_LEVEL=debug
+```
+
 ## Setup
 
 How to setup local databases for testing.
@@ -53,8 +59,8 @@ docker run --name facts_postgres \
 ```sh
 export DB_ADAPTER=redis
 export REDIS_URL=redis://localhost:6379
-yarn test
 
+DB_ADAPTER=redis REDIS_URL=redis://localhost:6379 yarn test
 DB_ADAPTER=redis REDIS_URL=redis://localhost:6379 yarn start
 ```
 
@@ -66,10 +72,10 @@ docker run --name facts_redis -p 6379:6379 -d redis
 
 ```sh
 export DB_ADAPTER=dynamo
-export DYNAMO_URL=http://localhost:8000
-yarn test
+export DYNAMO_URL=http://0.0.0.0:4566
 
-DB_ADAPTER=dynamo DYNAMO_URL=http://localhost:8000 yarn start
+DB_ADAPTER=dynamo DYNAMO_URL=http://0.0.0.0:4566 yarn test
+DB_ADAPTER=dynamo DYNAMO_URL=http://0.0.0.0:4566 yarn start
 ```
 
 ```sh

@@ -9,14 +9,19 @@ export const adapter: FactAdapter = {
   _name: "redis",
 
   set: async ({ key, fact }) => {
-    const payload = { ...fact, id: fact.id ?? ulid() };
+    const payload = {
+      ...fact,
+      id: fact.id ?? ulid(),
+      updated_at: new Date().toISOString(),
+      created_at: fact.created_at ?? new Date().toISOString(),
+    };
     await redis.hset(key, payload);
-    return [payload];
+    return payload;
   },
 
   get: async ({ key }) => {
     const exists = await redis.exists(key);
-    if (!exists) throw new NotFoundError(`Fact not found: ${key}`)
+    if (!exists) throw new NotFoundError(`Fact not found: ${key}`);
     return await redis.hgetall(key);
   },
 

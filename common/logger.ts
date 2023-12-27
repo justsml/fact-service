@@ -7,7 +7,7 @@ import pretty from "pino-pretty";
 export const logStream = pretty({
   colorize: true,
   singleLine: true,
-  ignore: "res.headers",
+  ignore: "res.headers,req.headers",
 });
 
 export const logger = pino(

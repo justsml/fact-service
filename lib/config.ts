@@ -47,16 +47,16 @@ export const logLevel =
   config.logLevel === "fatal"
     ? "fatal"
     : config.logLevel === "error"
-    ? "error"
-    : config.logLevel === "warn"
-    ? "warn"
-    : config.logLevel === "info"
-    ? "info"
-    : config.logLevel === "debug"
-    ? "debug"
-    : config.logLevel === "trace"
-    ? "trace"
-    : "info";
+      ? "error"
+      : config.logLevel === "warn"
+        ? "warn"
+        : config.logLevel === "info"
+          ? "info"
+          : config.logLevel === "debug"
+            ? "debug"
+            : config.logLevel === "trace"
+              ? "trace"
+              : "info";
 
 export const debugMode = config.debugMode;
 export const verbose = Boolean(config.verbose);

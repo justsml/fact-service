@@ -16,7 +16,7 @@ export const adapter: FactAdapter = {
         return result && result.length === 1 ? result[0] : result;
       })
       .catch((error) => {
-        logger.error("ERROR", error);
+        logger.error("ERROR %o", error);
         return checkPostgresError({ fact })(error);
       }),
 
@@ -44,6 +44,7 @@ export const adapter: FactAdapter = {
   find: async ({ keyPrefix }) =>
     await knex<Fact>("fact_store")
       .select("*")
+      .limit(1_000)
       .whereILike("key", knex.raw(`concat(?::text, '%')`, keyPrefix))
       .then((rows) => rows as Fact[]),
 };

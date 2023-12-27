@@ -15,7 +15,7 @@ export function errorHandler(
   response: Response,
   next: NextFunction,
 ) {
-  logger.error("ERROR", error);
+  logger.error("ERROR %o", error);
   const stack = process.env.NODE_ENV !== "production" ? error.stack : undefined;
   const status = error?.status ?? 500;
   response.status(status);
@@ -68,7 +68,7 @@ export const checkInvalidInputError =
   (error: Error) => {
     if (appEnv !== "development") context = undefined;
 
-    logger.error("ERROR", error);
+    logger.error("ERROR %o", error);
     const msg = error.message;
     const lastPart = msg.split(`invalid input`)[1];
     if (lastPart) throw new UserError(`Database Error: ${lastPart}`);

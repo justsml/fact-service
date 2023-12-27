@@ -10,7 +10,6 @@ const authorization = "Bearer tahjisheiPaa9taem3oo";
 describe.sequential(`Test: ${dbAdapter.toUpperCase()}`, () => {
   const users = Array(100).fill(null).map(createRandomUser);
   describe(`Batch Create ${dbAdapter}`, () => {
-
     bench(`Create batch: 100`, async () => {
       for await (const user of users) {
         const response = await request
@@ -22,7 +21,6 @@ describe.sequential(`Test: ${dbAdapter.toUpperCase()}`, () => {
         expect(response.status).toBe(201);
       }
     });
-
   });
 
   describe(`Batch Delete ${dbAdapter}`, () => {

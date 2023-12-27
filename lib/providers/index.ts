@@ -7,6 +7,8 @@ import * as firestore from "./firestore/adapter";
 
 import { dbAdapter } from "../config";
 
+const noop = () => Promise.resolve();
+
 export const getDataAdapter = (adapterName: string = dbAdapter) => {
   switch (adapterName) {
     case "postgres":
@@ -26,21 +28,21 @@ export const getDataAdapter = (adapterName: string = dbAdapter) => {
   }
 };
 
-// export const getDataAdapter = (adapterName: string = dbAdapter) => {
-//   switch (adapterName) {
-//     case "postgres":
-//       return PostgresAdapter
-//     case "redis":
-//       return RedisAdapter
-//     case "dynamo":
-//       return DynamoAdapter
-//     case "firestore":
-//       throw new Error(`firestore adapter not yet implemented`)
-//     case "cassandra":
-//       throw new Error(`cassandra adapter not yet implemented`)
-//     case "foundation":
-//       throw new Error(`foundation adapter not yet implemented`)
-//     default:
-//       throw new Error(`Invalid dbAdapter: ${adapterName}`);
-//   }
-// }
+export const getSetup = (adapterName: string = dbAdapter) => {
+  switch (adapterName) {
+    case "postgres":
+      return postgres.setup;
+    case "dynamo":
+      return dynamo.setup;
+    case "cassandra":
+      return cassandra.setup;
+    case "redis":
+      return noop;
+    case "firestore":
+      return noop;
+    case "foundation":
+      throw new Error(`foundation adapter not yet implemented`);
+    default:
+      throw new Error(`Invalid dbAdapter: ${adapterName}`);
+  }
+};

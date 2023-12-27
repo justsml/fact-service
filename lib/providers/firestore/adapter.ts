@@ -17,14 +17,14 @@ const COLLECTION_NAME = "fact_store";
 
 export const adapter: FactAdapter = {
   _name: "firestore",
-  
+
   set: async ({ key, fact }) => {
     try {
       const docRef = firestore.collection(COLLECTION_NAME).doc(key);
       await docRef.set(fact);
       return { key, ...fact };
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error;
     }
   },
@@ -38,7 +38,7 @@ export const adapter: FactAdapter = {
       }
       return { key, ...doc.data() }; // Adjust as needed
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error;
     }
   },
@@ -57,7 +57,7 @@ export const adapter: FactAdapter = {
         message: `Deleted ${count} fact(s) with id(s) ${key.join(", ")}`,
       };
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error;
     }
   },
@@ -75,7 +75,7 @@ export const adapter: FactAdapter = {
         ...doc.data(),
       })) as Fact[]; // Adjust as needed
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error;
     }
   },
@@ -88,7 +88,7 @@ export const reset = async () => {
     await Promise.all(docs.map((doc) => doc.delete()));
     return true;
   } catch (error) {
-    logger.error("ERROR", error);
+    logger.error("ERROR %o", error);
     throw error;
   }
 };

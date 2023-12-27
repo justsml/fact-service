@@ -22,7 +22,7 @@ export const adapter: FactAdapter = {
       const result = await client.execute(query, params, { prepare: true });
       return result.rows[0]; // Adjust based on your data model and requirements
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error; // Or handle the error as needed
     }
   },
@@ -33,7 +33,7 @@ export const adapter: FactAdapter = {
       const result = await client.execute(query, [key], { prepare: true });
       return result.rows[0]; // Adjust as needed
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error;
     }
   },
@@ -48,7 +48,7 @@ export const adapter: FactAdapter = {
         message: `Deleted any fact with an id equal to ${key}`,
       };
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error;
     }
   },
@@ -62,7 +62,7 @@ export const adapter: FactAdapter = {
       });
       return result.rows as Fact[]; // Adjust as needed
     } catch (error) {
-      logger.error("ERROR", error);
+      logger.error("ERROR %o", error);
       throw error;
     }
   },

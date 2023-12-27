@@ -12,6 +12,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { logger } from "../../../common/logger";
 import { dynamoDbUrl } from "../../config";
+import { NotFoundError, UserError } from "../../factService/errors";
 import type { Fact, FactAdapter } from "../../factService/types";
 
 const FACT_STORE_TABLE_NAME = process.env.FACT_TABLE_NAME ?? "fact_store";
@@ -19,32 +20,51 @@ const FACT_STORE_TABLE_NAME = process.env.FACT_TABLE_NAME ?? "fact_store";
 const dynamoDbClient = new DynamoDBClient({
   region: "us-east-1",
   endpoint: dynamoDbUrl,
+
+  // credentials: {
+  //   accessKeyId: "fake",
+  //   secretAccessKey: "fake",
+  // },
 });
+
 const docClient = DynamoDBDocumentClient.from(dynamoDbClient);
 
+logger.debug("DynamoAdapter %o", {
+  url: dynamoDbUrl,
+  table: FACT_STORE_TABLE_NAME,
+});
 export const adapter: FactAdapter = {
   _name: "dynamo",
-  
+
   set: async (fact) => {
     const { key, fact: payload } = fact;
+    const existing = await adapter.get({ key: fact.key }).catch(() => null);
+    if (existing) {
+      logger.debug("Dynamo.exists(%o).update_mode", existing);
+      payload.TIMESTAMP = existing.TIMESTAMP ?? Date.now();
+      payload.created_at = existing.created_at;
+    }
     const Item = {
       ...payload,
-      TIMESTAMP: Date.now(),
       KEY: key,
+      TIMESTAMP: payload.TIMESTAMP ?? Date.now(),
+      created_at: payload.created_at ?? new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
-    logger.debug("DynamoAdapter.set", Item);
+    logger.debug("Dynamo.set(%o)", Item);
     return docClient
       .send(
         new PutCommand({
           TableName: FACT_STORE_TABLE_NAME,
-          Item,
           ReturnValues: "ALL_OLD",
+          Item,
         }),
       )
       .then((result) => {
-        logger.debug("PutCommand result", result);
-        return result.Attributes as Fact;
-      });
+        logger.debug("PutCommand: %o", result);
+        return Item;
+      })
+      .catch(autoSetup);
   },
 
   get: async ({ key }) => {
@@ -57,7 +77,11 @@ export const adapter: FactAdapter = {
           ExpressionAttributeNames: { "#k": "KEY" },
         }),
       )
-      .then((result) => result.Items?.[0] as Fact);
+      .then((result) => {
+        if (result.Items && result.Items?.length <= 0)
+          return Promise.reject(new NotFoundError(`Fact not found: ${key}`));
+        return result.Items?.[0] as Fact;
+      });
   },
 
   del: async ({ key }) => {
@@ -71,17 +95,17 @@ export const adapter: FactAdapter = {
         }),
       )
       .then((result) => {
-        logger.debug("DeleteCommand result", result);
+        logger.debug("DeleteCommand: %s", key);
         return {
           success: !!result.Attributes,
           count: 1,
-          message: `Deleted any fact with an id equal to ${key}`,
+          message: `Deleted key matching ${key}`,
         };
       });
   },
 
   find: async ({ keyPrefix }) => {
-    logger.debug("DynamoAdapter.find", keyPrefix);
+    logger.debug("Dynamo.find(%o)", keyPrefix);
     return docClient
       .send(
         new ScanCommand({
@@ -144,3 +168,14 @@ export const reset = async () => {
     }),
   );
 };
+
+function autoSetup<TError extends Error>(error: TError) {
+  if ("code" in error && error?.code === "ResourceNotFoundException") {
+    return setup()
+      .catch((error) => logger.error("ERROR %o", error))
+      .then(() =>
+        Promise.reject(new UserError("Table not found! Retry your request.")),
+      );
+  }
+  throw error;
+}

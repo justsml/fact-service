@@ -21,7 +21,7 @@ const enc = encodeURIComponent;
  */
 const FactApiClient: FactAdapter = {
   _name: "http",
-  
+
   set: (fact) => client.put(`/`, fact).then((res) => res.data),
 
   get: ({ key }) =>

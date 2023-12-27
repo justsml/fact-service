@@ -7,15 +7,15 @@ export type FactEntity = {
 
   created_by?: string;
   updated_by?: string;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at?: Date | string;
+  updated_at?: Date | string;
 };
 
 /** Fact is the API response */
 export interface Fact {
   [key: string]: unknown;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at?: Date | string;
+  updated_at?: Date | string;
 }
 
 /** KeyFact describes the input for update/set */
