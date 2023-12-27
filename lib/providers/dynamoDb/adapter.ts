@@ -22,7 +22,9 @@ const dynamoDbClient = new DynamoDBClient({
 });
 const docClient = DynamoDBDocumentClient.from(dynamoDbClient);
 
-export const DynamoAdapter: FactAdapter = {
+export const adapter: FactAdapter = {
+  _name: "dynamo",
+  
   set: async (fact) => {
     const { key, fact: payload } = fact;
     const Item = {
@@ -41,7 +43,7 @@ export const DynamoAdapter: FactAdapter = {
       )
       .then((result) => {
         logger.debug("PutCommand result", result);
-        return result.Attributes as Fact
+        return result.Attributes as Fact;
       });
   },
 
@@ -64,12 +66,11 @@ export const DynamoAdapter: FactAdapter = {
         new DeleteCommand({
           TableName: FACT_STORE_TABLE_NAME,
           Key: { KEY: key },
-        
+
           ReturnValues: "ALL_OLD",
         }),
       )
       .then((result) => {
-
         logger.debug("DeleteCommand result", result);
         return {
           success: !!result.Attributes,
@@ -88,7 +89,7 @@ export const DynamoAdapter: FactAdapter = {
           FilterExpression: "begins_with(#k, :k)",
           ExpressionAttributeNames: { "#k": "KEY" },
           ExpressionAttributeValues: { ":k": keyPrefix },
-        })
+        }),
         // new QueryCommand({
         //   TableName: FACT_STORE_TABLE_NAME,
         //   // KeyConditionExpression: "begins_with(#k, :k)",
@@ -106,55 +107,23 @@ export const DynamoAdapter: FactAdapter = {
   },
 };
 
-// const createUpdateParams = (params: { [key: string]: unknown }) => ({
-//   UpdateExpression: `set ${Object.entries(params)
-//     .map(([key]) => `#${key} = :${key}, `)
-//     .reduce((acc, str) => acc + str, "")
-//     .slice(0, -2)}`,
-
-//   ExpressionAttributeValues: Object.entries(params).reduce(
-//     (acc, [key, value]) => ({
-//       ...acc,
-//       [`:${key}`]: value,
-//     }),
-//     {},
-//   ),
-
-//   ExpressionAttributeNames: Object.keys(params).reduce(
-//     (acc, key) => ({
-//       ...acc,
-//       [`#${key}`]: key,
-//     }),
-//     {},
-//   ),
-// });
-
 /**
  * Temp helper to create a table in DynamoDB */
-export const setupDynamo = async () => {
+export const setup = async () => {
   return await dynamoDbClient.send(
     new CreateTableCommand({
       TableName: FACT_STORE_TABLE_NAME,
-
       AttributeDefinitions: [
         {
           AttributeName: "KEY",
           AttributeType: "S",
         },
-        // {
-        //   AttributeName: "TIMESTAMP",
-        //   AttributeType: "N",
-        // },
       ],
       KeySchema: [
         {
           AttributeName: "KEY",
           KeyType: "HASH",
         },
-        // {
-        //   AttributeName: "TIMESTAMP",
-        //   KeyType: "RANGE",
-        // },
       ],
 
       ProvisionedThroughput: {
@@ -168,7 +137,7 @@ export const setupDynamo = async () => {
   );
 };
 
-export const cleanupDynamo = async () => {
+export const reset = async () => {
   return await dynamoDbClient.send(
     new DeleteTableCommand({
       TableName: FACT_STORE_TABLE_NAME,

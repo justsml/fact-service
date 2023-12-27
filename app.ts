@@ -7,11 +7,12 @@ import { verifyTokenMiddleware } from "./lib/auth";
 import { httpLogger } from "./common/logger";
 import { notFoundHandler, errorHandler } from "./common/routeUtils";
 import { getDataAdapter } from "./lib/providers";
+import { dbAdapter } from "./lib/config";
 
-const dataAdapter = getDataAdapter();
-const factRouter = factApiRouter(dataAdapter);
+// const dataAdapter = getDataAdapter();
+// const factRouter = factApiRouter(dataAdapter);
 
-export default () =>
+export default (adapter = dbAdapter) =>
   express()
     .use(helmet())
     .use(express.query({ parseArrays: false }))
@@ -20,6 +21,6 @@ export default () =>
     .use(httpLogger)
     .use(cors({ origin: true, credentials: true, maxAge: ms("1 month") }))
     .use(verifyTokenMiddleware)
-    .use("/api/facts", factRouter)
+    .use("/api/facts", factApiRouter(getDataAdapter(adapter)))
     .use(notFoundHandler)
     .use(errorHandler);

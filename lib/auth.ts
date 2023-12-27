@@ -16,9 +16,7 @@ export const verifyTokenMiddleware: Handler = (request, response, next) => {
 
   if (matched) return next();
 
-  return response
-    .status(401)
-    .json({
-      error: "Unauthorized: Invalid Authorization. API Token is Required!",
-    });
+  return response.status(401).json({
+    error: "Unauthorized: Invalid Authorization. API Token is Required!",
+  });
 };

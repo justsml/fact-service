@@ -5,8 +5,8 @@ export const toCsvString = (value: any) =>
   value == null
     ? ""
     : isArray(value)
-    ? value?.filter(Boolean)?.join(",")
-    : `${value}`.split(",").filter(Boolean).join(",");
+      ? value?.filter(Boolean)?.join(",")
+      : `${value}`.split(",").filter(Boolean).join(",");
 
 export const getKeyFromParamsOrQuery = (request: Request) => {
   let { key } = request.params;

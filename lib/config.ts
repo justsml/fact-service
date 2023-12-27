@@ -7,11 +7,15 @@ const config = easyConfig({
   env: ["FACTS_ENV", "NODE_ENV"],
   port: ["--port", "-p", "PORT"],
   allowedTokens: ["--allowedTokens", "ALLOWED_TOKENS"],
-  
-  debugMode: ["--debug", "DEBUG_MODE"],
 
+  debugMode: ["--debug", "DEBUG_MODE"],
+  verbose: ["--verbose", "VERBOSE"],
   // Dynamic DB_ADAPTER var controls which DB adapter is used
   dbAdapter: ["--dbAdapter", "DB_ADAPTER"],
+
+  logLevel: ["--logLevel", "LOG_LEVEL"],
+
+  testAdapters: ["--testAdapters", "TEST_ADAPTERS"],
 
   // DB Connection Strings
   databaseUrl: ["--db", "DATABASE_URL", "DATABASE_URI"],
@@ -32,7 +36,30 @@ export const allowedTokens = _parseTokenList(config.allowedTokens);
 // override the config.allowedTokens?
 // config.allowedTokens = allowedTokens;
 
-export const env = config.env;
+export const appEnv = config.env ?? "development";
+
+export const testAdapters =
+  typeof config.testAdapters === "string" && config.testAdapters.length > 1
+    ? config.testAdapters.split(",")
+    : ["postgres", "redis", "dynamo", "cassandra", "firestore"];
+
+export const logLevel =
+  config.logLevel === "fatal"
+    ? "fatal"
+    : config.logLevel === "error"
+    ? "error"
+    : config.logLevel === "warn"
+    ? "warn"
+    : config.logLevel === "info"
+    ? "info"
+    : config.logLevel === "debug"
+    ? "debug"
+    : config.logLevel === "trace"
+    ? "trace"
+    : "info";
+
+export const debugMode = config.debugMode;
+export const verbose = Boolean(config.verbose);
 export const port = Number(config.port);
 export const databaseUrl = config.databaseUrl;
 export const redisUrl = config.redisUrl;
@@ -48,6 +75,7 @@ export type DbAdapter =
   | "firestore"
   | "cassandra"
   | "foundation";
+
 export const supportedDbAdapters: Readonly<DbAdapter[]> = [
   "postgres",
   "redis",

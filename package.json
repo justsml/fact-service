@@ -13,12 +13,11 @@
   "homepage": "https://github.com/justsml/fact-service",
   "scripts": {
     "start": "nodemon --watch './**/*.ts' --exec 'ts-node' index.ts",
-    "test": "DB_ADAPTER=postgres vitest",
+    "test": "vitest",
     "test:pg": "DB_ADAPTER=postgres vitest",
     "test:redis": "DB_ADAPTER=redis vitest",
     "test:dynamo": "DB_ADAPTER=dynamo vitest",
     "test:cassandra": "DB_ADAPTER=cassandra vitest",
-
     "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
     "cli:get": "./bin/fact-cli get",
     "cli:set": "./bin/fact-cli set",
@@ -49,6 +48,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.478.0",
     "@aws-sdk/lib-dynamodb": "^3.478.0",
+    "@google-cloud/firestore": "^7.1.0",
     "@elite-libs/auto-config": "^1.4.1",
     "axios": "^1.6.2",
     "cassandra-driver": "^4.7.2",

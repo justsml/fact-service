@@ -87,7 +87,7 @@ docker run --name fact-svc-dynamodb \
   --detach \
   -p 8000:8000 \
   amazon/dynamodb-local
-  
+
 ```
 
 #### Start Local Cassandra (Optional)
@@ -119,7 +119,6 @@ docker run -d --name clickhouse-server \
   -p 8123:8123 -p 9000:9000 -p 9009:9009 -p 9363:9363 \
   clickhouse/clickhouse-server:23.2
 ```
-
 
 ### Start Service
 
@@ -229,9 +228,9 @@ curl --request POST \
   - [x] Postgres
   - [x] Redis
   - [x] DynamoDB
-  - [ ] Firestore
+  - [x] Firestore
+  - [x] Cassandra
   - [ ] FoundationDB
-  - [ ] Cassandra
   - [ ] S3?
   - [ ] ClickHouse
   - [ ] ???

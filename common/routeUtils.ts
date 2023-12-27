@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import { appEnv } from "../lib/config";
 import { logger } from "./logger";
 import UserError from "./userError";
-
 
 export function notFoundHandler(request: Request, response: Response) {
   response
@@ -55,7 +55,7 @@ export function getQueryOptions(
 }
 
 export const checkPostgresError =
-  <TContextType = unknown>(context: TContextType) =>
+  <TContextType = unknown>(context: TContextType | undefined) =>
   (error: Error) => {
     checkInvalidInputError(context)(error);
     checkDuplicateKeyError(context)(error);
@@ -64,17 +64,21 @@ export const checkPostgresError =
   };
 
 export const checkInvalidInputError =
-  <TContextType = unknown>(context: TContextType) =>
+  <TContextType = unknown>(context: TContextType | undefined) =>
   (error: Error) => {
+    if (appEnv !== "development") context = undefined;
+
     logger.error("ERROR", error);
     const msg = error.message;
     const lastPart = msg.split(`invalid input`)[1];
     if (lastPart) throw new UserError(`Database Error: ${lastPart}`);
     throw error;
   };
+
 export const checkDuplicateKeyError =
-  <TContextType = unknown>(context: TContextType) =>
+  <TContextType = unknown>(context: TContextType | undefined) =>
   (error: Error) => {
+    if (appEnv !== "development") context = undefined;
     if (error.message.includes("duplicate key")) {
       throw new UserError(
         `Fact already exists! Context: ${JSON.stringify(context)}`,
@@ -84,8 +88,9 @@ export const checkDuplicateKeyError =
   };
 
 export const checkRelationError =
-  <TContextType = unknown>(context: TContextType) =>
+  <TContextType = unknown>(context: TContextType | undefined) =>
   (error: Error) => {
+    if (appEnv !== "development") context = undefined;
     if (error.message.includes("of relation")) {
       const msg = error.message
         .split(" - column")[1]

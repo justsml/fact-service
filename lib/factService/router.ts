@@ -1,5 +1,6 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
 import express, { Request, Response, NextFunction } from "express";
+import { request } from "http";
 import { logger } from "../../common/logger";
 import UserError from "../../common/userError";
 // import { createTable, dropTable } from "../providers/dynamoDb/adapter";
@@ -13,6 +14,13 @@ const keyPathPattern = "/:key([a-zA-Z0-9-:/]{0,})";
 export function factApiRouter(factsDbClient: FactAdapter) {
   return express
     .Router()
+    .use((request, response, next) => {
+      response.set({
+        "X-Service-Name": "fact-service",
+        "X-DB-Adapter": factsDbClient._name,
+      });
+      next();
+    })
     .get(keyPathPattern, getById)
     .put(keyPathPattern, create)
     .post(keyPathPattern, create)
@@ -31,9 +39,10 @@ export function factApiRouter(factsDbClient: FactAdapter) {
 
     if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
       logger.debug("getByPrefix(%s*)", keyPrefix);
-      return factsDbClient.find({ keyPrefix: `${keyPrefix}` })
-      .then((facts) => response.status(200).json(facts))
-      .catch(next);
+      return factsDbClient
+        .find({ keyPrefix: `${keyPrefix}` })
+        .then((facts) => response.status(200).json(facts))
+        .catch(next);
     }
 
     factsDbClient

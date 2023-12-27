@@ -1,10 +1,11 @@
+import type { Fact, FactAdapter } from "../../factService/types";
 import knex from "../../../db/knex";
 import { checkPostgresError } from "../../../common/routeUtils";
-import { toArray } from "../../../common/arrayUtils";
-import type { Fact, FactAdapter } from "../../factService/types";
 import { logger } from "../../../common/logger";
 
-export const PostgresAdapter: FactAdapter = {
+export const adapter: FactAdapter = {
+  _name: "postgres",
+
   set: async (fact) =>
     await knex<Fact>("fact_store")
       .insert({ ...fact, updated_at: new Date() })
@@ -45,4 +46,23 @@ export const PostgresAdapter: FactAdapter = {
       .select("*")
       .whereILike("key", knex.raw(`concat(?::text, '%')`, keyPrefix))
       .then((rows) => rows as Fact[]),
+};
+
+export const setup = async () => {
+  return knex.schema
+    .createTable("fact_store", (table) => {
+      table.string("key", 500).primary();
+      table.jsonb("value").notNullable();
+
+      table.timestamps(true, true);
+    })
+    .then(() => console.log("!!! created table fact_store !!!"))
+    .catch((err) => console.error(err));
+};
+
+export const reset = async () => {
+  return knex.schema
+    .dropTableIfExists("fact_store")
+    .then(() => console.log("!!! dropped table fact_store !!!"))
+    .catch((err) => console.error(err));
 };

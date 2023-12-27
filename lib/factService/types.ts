@@ -1,3 +1,4 @@
+import type { DbAdapter } from "../config";
 
 /** FactEntity is the raw database record */
 export type FactEntity = {
@@ -35,6 +36,7 @@ export type BatchResultMessage = {
  * The FactService interface helps our http & database clients stay aligned.
  */
 export interface FactAdapter {
+  readonly _name: DbAdapter | "http";
   /** Get a Fact, by key */
   get: ({ key }: { key: string }) => Promise<Fact | undefined>;
   /** Create/update a Fact, key & payload */

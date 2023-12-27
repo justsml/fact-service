@@ -20,6 +20,8 @@ const enc = encodeURIComponent;
  * This is the HTTP client for the FactService.
  */
 const FactApiClient: FactAdapter = {
+  _name: "http",
+  
   set: (fact) => client.put(`/`, fact).then((res) => res.data),
 
   get: ({ key }) =>
@@ -36,9 +38,7 @@ const FactApiClient: FactAdapter = {
   //   client.get<PathCountResults>(`/?count=path`).then((res) => res.data),
 
   find: ({ keyPrefix }) =>
-    client
-      .get<Fact[]>(`/?keyPrefix=${enc(keyPrefix)}`)
-      .then((res) => res.data),
+    client.get<Fact[]>(`/?keyPrefix=${enc(keyPrefix)}`).then((res) => res.data),
 
   // findAllFactsByPath: ({ path, limit }) =>
   //   client

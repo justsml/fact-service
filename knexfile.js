@@ -12,7 +12,10 @@ const connectionConfig = {
   client: "pg",
   connection:
     databaseUrl || "postgres://postgres:postgres@localhost:5432/postgres",
-  migrations: { directory: "./db/migrations", tableName: "knex_migrations_facts" },
+  migrations: {
+    directory: "./db/migrations",
+    tableName: "knex_migrations_facts",
+  },
   seeds: { directory: "./db/seeds" },
   debug: Boolean(debugMode),
 };
