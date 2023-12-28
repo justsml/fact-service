@@ -86,11 +86,11 @@ docker run --name facts_dynamodb -p 8000:8000 -d amazon/dynamodb-local -jar Dyna
 
 ```sh
 export DB_ADAPTER=cassandra
-export CASSANDRA_URL=cassandra://localhost:9042
+export CASSANDRA_URL=cassandra://127.0.0.1:9042
 
 yarn test
 
-DB_ADAPTER=cassandra CASSANDRA_URL=cassandra://localhost:9042 yarn start
+DB_ADAPTER=cassandra CASSANDRA_URL=127.0.0.1:9042 yarn start
 ```
 
 ```sh
@@ -111,6 +111,6 @@ DB_ADAPTER=firestore FIRESTORE_PROJECT_ID=facts-project FIRESTORE_HOST=0.0.0.0 y
 ```sh
 docker run --name facts_firestore -p 8080:8080 -d \
   -e FIRESTORE_PROJECT_ID=facts-project \
-  gcr.io/google.com/cloudsdktool/google-cloud-cli:alpine \
-  gcloud beta emulators firestore start --host-port=0.0.0.0:8080
+  gcr.io/google.com/cloudsdktool/google-cloud-cli:slim \
+  gcloud emulators firestore start --host-port=0.0.0.0:8080
 ```

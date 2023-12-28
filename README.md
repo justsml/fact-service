@@ -13,6 +13,7 @@
   - [Query Facts](#query-facts)
   - [Updating Facts](#updating-facts)
 - [TODO](#todo)
+  - [Articles](#articles)
   - [Features \& Patterns](#features--patterns)
   - [Security \& Correctness](#security--correctness)
 
@@ -237,6 +238,11 @@ curl --request POST \
 - [ ] Convert to workspace (Monorepo).
   - [ ] Add `fact-editor` project, deployment, etc.
 - [ ] Make native ESM all the way through.
+
+### Articles
+
+- [ ] Write up on `./bin/fact-cli` and how to use it.
+- [ ] Write up on practical testing.
 
 ### Features & Patterns
 

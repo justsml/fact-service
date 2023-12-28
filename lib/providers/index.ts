@@ -46,3 +46,22 @@ export const getSetup = (adapterName: string = dbAdapter) => {
       throw new Error(`Invalid dbAdapter: ${adapterName}`);
   }
 };
+
+export const resetDb = (adapterName: string = dbAdapter) => {
+  switch (adapterName) {
+    case "postgres":
+      return postgres.reset;
+    case "dynamo":
+      return dynamo.reset;
+    case "cassandra":
+      return cassandra.reset;
+    case "redis":
+      return noop;
+    case "firestore":
+      return noop;
+    case "foundation":
+      throw new Error(`foundation adapter not yet implemented`);
+    default:
+      throw new Error(`Invalid dbAdapter: ${adapterName}`);
+  }
+};

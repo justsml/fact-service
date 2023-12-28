@@ -34,7 +34,6 @@ export function factApiRouter(factsDbClient: FactAdapter) {
     const { key } = request.params;
     const { keyPrefix } = request.query;
 
-    logger.debug("getById(%s)", key);
     if (!key && !keyPrefix) return next(new UserError("Key is required!"));
 
     if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
@@ -44,6 +43,8 @@ export function factApiRouter(factsDbClient: FactAdapter) {
         .then((facts) => response.status(200).json(facts))
         .catch(next);
     }
+
+    logger.debug("getById(%s)", key);
 
     factsDbClient
       .get({ key })

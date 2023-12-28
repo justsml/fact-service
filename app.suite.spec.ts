@@ -12,6 +12,9 @@ const getHeaders = () => ({
   "Content-Type": "application/json",
   Accept: "application/json; charset=utf-8",
 });
+
+// const clear
+
 describe.each(testAdapters.map((a) => a.toUpperCase()))(
   `Test: %s`,
   (adapter) => {

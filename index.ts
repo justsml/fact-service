@@ -12,3 +12,6 @@ app
   .listen(port)
   .on("error", logger.error.bind(logger))
   .on("listening", () => logger.warn(startMessage));
+
+process.on("uncaughtException", logger.fatal.bind(logger));
+process.on("unhandledRejection", logger.error.bind(logger));

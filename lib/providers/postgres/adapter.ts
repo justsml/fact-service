@@ -58,7 +58,11 @@ export const setup = async () => {
       table.timestamps(true, true);
     })
     .then(() => console.log("!!! created table fact_store !!!"))
-    .catch((err) => console.error(err));
+    .catch((err) =>
+      err.message.includes("already exists")
+        ? "Already exists"
+        : console.error(err),
+    );
 };
 
 export const reset = async () => {

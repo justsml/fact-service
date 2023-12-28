@@ -18,6 +18,8 @@
     "test:redis": "DB_ADAPTER=redis vitest",
     "test:dynamo": "DB_ADAPTER=dynamo vitest",
     "test:cassandra": "DB_ADAPTER=cassandra vitest",
+    "db:init": "./scripts/db:setup.ts",
+    "db:reset": "./scripts/db:reset.ts",
     "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,css,scss,md}'",
     "cli:get": "./bin/fact-cli get",
     "cli:set": "./bin/fact-cli set",

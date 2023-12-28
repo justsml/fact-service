@@ -29,10 +29,10 @@ const dynamoDbClient = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(dynamoDbClient);
 
-logger.debug("DynamoAdapter %o", {
-  url: dynamoDbUrl,
-  table: FACT_STORE_TABLE_NAME,
-});
+// logger.debug("DynamoAdapter %o", {
+//   url: dynamoDbUrl,
+//   table: FACT_STORE_TABLE_NAME,
+// });
 export const adapter: FactAdapter = {
   _name: "dynamo",
 
@@ -134,31 +134,38 @@ export const adapter: FactAdapter = {
 /**
  * Temp helper to create a table in DynamoDB */
 export const setup = async () => {
-  return await dynamoDbClient.send(
-    new CreateTableCommand({
-      TableName: FACT_STORE_TABLE_NAME,
-      AttributeDefinitions: [
-        {
-          AttributeName: "KEY",
-          AttributeType: "S",
-        },
-      ],
-      KeySchema: [
-        {
-          AttributeName: "KEY",
-          KeyType: "HASH",
-        },
-      ],
+  return await dynamoDbClient
+    .send(
+      new CreateTableCommand({
+        TableName: FACT_STORE_TABLE_NAME,
+        AttributeDefinitions: [
+          {
+            AttributeName: "KEY",
+            AttributeType: "S",
+          },
+        ],
+        KeySchema: [
+          {
+            AttributeName: "KEY",
+            KeyType: "HASH",
+          },
+        ],
 
-      ProvisionedThroughput: {
-        ReadCapacityUnits: 1,
-        WriteCapacityUnits: 1,
-      },
-      // StreamSpecification: {
-      //   StreamEnabled: false,
-      // },
-    }),
-  );
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1,
+        },
+        // StreamSpecification: {
+        //   StreamEnabled: false,
+        // },
+      }),
+    )
+    .catch((error) => {
+      if (error.message.includes("already exists")) {
+        return "Already exists";
+      }
+      throw error;
+    });
 };
 
 export const reset = async () => {

@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 import { appEnv } from "../lib/config";
+import { NotFoundError } from "../lib/factService/errors";
 import { logger } from "./logger";
 import UserError from "./userError";
 
 export function notFoundHandler(request: Request, response: Response) {
   response
     .status(404)
-    .send({ error: "Not found!", status: 404, url: request.originalUrl });
+    .send({ error: "Not found!", url: request.originalUrl });
 }
 
 export function errorHandler(
@@ -16,6 +17,10 @@ export function errorHandler(
   next: NextFunction,
 ) {
   logger.error("ERROR %o", error);
+  if (error instanceof NotFoundError)
+    return response
+    .status(404)
+    .send({ error: error.message ?? "Not found!", url: request.originalUrl });
   const stack = process.env.NODE_ENV !== "production" ? error.stack : undefined;
   const status = error?.status ?? 500;
   response.status(status);

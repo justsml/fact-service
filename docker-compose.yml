@@ -1,0 +1,55 @@
+version: '3.8'
+
+name: factsdb
+
+services:
+  facts_postgres:
+    image: postgres:15.5-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: facts
+    ports:
+      - "5432:5432"
+    command: >
+      postgres -c listen_addresses=*
+      -c password_encryption=scram-sha-256
+      -c shared_memory_type=sysv
+      -c shared_buffers=256MB
+      -c max_connections=200
+
+  facts_redis:
+    image: redis:7.2.3-alpine
+    ports:
+      - "6379:6379"
+
+  facts_cassandra:
+    image: cassandra:4.1.3
+    volumes:
+      - ./lib/providers/cassandra/cassandra.yaml:/etc/cassandra/cassandra.yaml
+    ports:
+      - "9042:9042"
+
+  facts_firestore:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:458.0.1-emulators
+    environment:
+      FIRESTORE_PROJECT_ID: facts-project
+    ports:
+      - "8080:8080"
+    command: "gcloud emulators firestore start --quiet --host-port=0.0.0.0:8080"
+
+  facts_localstack:
+    image: localstack/localstack:3.0.2
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: "dynamodb"
+      DEFAULT_REGION: "us-east-1"
+      DYNAMODB_PORT: "4566"
+      LOCALSTACK_HOSTNAME: "localhost"
+
+networks:
+  default:
+    name: fact_net
+    # driver: bridge
+
