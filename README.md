@@ -4,7 +4,7 @@
 
 - [Overview](#overview)
 - [Getting Started](#getting-started)
-  - [Create `.env.local` file](#create-envlocal-file)
+  - [Create `.env` file](#create-env-file)
 - [Start All Databases](#start-all-databases)
 - [Test Database Integrations](#test-database-integrations)
   - [Start Service](#start-service)
@@ -27,12 +27,12 @@ The rest of this README will get you up and running locally.
 
 ## Getting Started
 
-### Create `.env.local` file
+### Create `.env` file
 
-Copy the `.env.example` to `.env.local`.
+Copy the `.env.example` to `.env`.
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 Configure access with the `ALLOWED_TOKENS` environment variable. This is a space-separated set of API tokens that grant access to the service.
