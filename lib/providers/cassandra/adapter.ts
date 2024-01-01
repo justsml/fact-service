@@ -14,7 +14,6 @@ const requestTracker = new cassandra.tracker.RequestLogger({
   slowThreshold: 100,
 });
 
-
 const convertKeyToListLiteral = (key: string) =>
  `${key
   .split(/[/:]+/gim)

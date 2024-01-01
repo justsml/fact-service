@@ -5,7 +5,7 @@ import pinoHttp from "pino-http";
 import pretty from "pino-pretty";
 
 export const logStream =
-  appEnv === "development"
+  appEnv !== "production"
     ? pretty({
         colorize: true,
         singleLine: true,
