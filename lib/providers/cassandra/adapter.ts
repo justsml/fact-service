@@ -15,18 +15,18 @@ const requestTracker = new cassandra.tracker.RequestLogger({
 });
 
 const convertKeyToListLiteral = (key: string) =>
- `${key
-  .split(/[/:]+/gim)
-  .map((k) => `'${k.replace(/'+/gim, "")}'`)
-  .join(", ")}`;
-
-  const convertKeyToContainsExpression = (key: string) =>
   `${key
-   .split(/[/:]+/gim)
-   .map((k) => `key_parts CONTAINS '${k.replace(/'+/gim, "")}'`)
-   .join(" AND ")}`;
- 
- const client = new Client({
+    .split(/[/:]+/gim)
+    .map((k) => `'${k.replace(/'+/gim, "")}'`)
+    .join(", ")}`;
+
+const convertKeyToContainsExpression = (key: string) =>
+  `${key
+    .split(/[/:]+/gim)
+    .map((k) => `key_parts CONTAINS '${k.replace(/'+/gim, "")}'`)
+    .join(" AND ")}`;
+
+const client = new Client({
   contactPoints: [cassandraUrl ?? "localhost"],
   localDataCenter: "datacenter1",
   // keyspace: KEY_SPACE,
@@ -57,7 +57,9 @@ export const adapter: FactAdapter = {
         value,
         created_at,
         updated_at
-      ) VALUES (?, {${convertKeyToListLiteral(key)}}, ?, ?, ?) USING TIMESTAMP ?`;
+      ) VALUES (?, {${convertKeyToListLiteral(
+        key,
+      )}}, ?, ?, ?) USING TIMESTAMP ?`;
     fact = Object.fromEntries(
       Object.entries(fact).map(([k, v]) => [k, `${v}`]),
     );

@@ -10,6 +10,7 @@ export const toCsvString = (value: any) =>
 
 export const getKeyFromParamsOrQuery = (request: Request) => {
   let { key } = request.params;
-  if (!key && request.query?.key) key = `${toCsvString(request.query?.key)}`;
+  if (!key && request.query?.["key"])
+    key = `${toCsvString(request.query?.["key"])}`;
   return { key };
 };

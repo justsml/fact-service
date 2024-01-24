@@ -1,6 +1,7 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
-import express, { Request, Response, NextFunction } from "express";
-import { request } from "http";
+import express from "express";
+import type { Request, Response, NextFunction } from "express";
+// import { request } from "http";
 import { logger } from "../../common/logger";
 import UserError from "../../common/userError";
 // import { createTable, dropTable } from "../providers/dynamoDb/adapter";
@@ -14,7 +15,7 @@ const keyPathPattern = "/:key([a-zA-Z0-9-:/]{0,})";
 export function factApiRouter(factsDbClient: FactAdapter) {
   return express
     .Router()
-    .use((request, response, next) => {
+    .use((_request, response, next) => {
       response.set({
         "X-Service-Name": "fact-service",
         "X-DB-Adapter": factsDbClient._name,
@@ -61,7 +62,7 @@ export function factApiRouter(factsDbClient: FactAdapter) {
       return next(new UserError("payload is required!"));
 
     factsDbClient
-      .set({ key, fact: payload })
+      .set({ key, value: payload })
       .then((facts) => response.status(201).json(facts))
       .catch(next);
   }

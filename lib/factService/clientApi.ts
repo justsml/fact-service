@@ -1,10 +1,10 @@
 import axios from "axios";
 // import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactAdapter } from "./types";
+import type { Fact, FactAdapter, FactEntity } from "./types";
 
 const FactsConfig = {
-  apiUrl: process.env.API_URL ?? "http://localhost:3000/api/facts",
-  apiToken: process.env.API_TOKEN ?? null,
+  apiUrl: process.env["API_URL"] ?? "http://localhost:3000/api/facts",
+  apiToken: process.env["API_TOKEN"] ?? null,
 };
 
 const client = axios.create({
@@ -25,7 +25,7 @@ const FactApiClient: FactAdapter = {
   set: (fact) => client.put(`/`, fact).then((res) => res.data),
 
   get: ({ key }) =>
-    client.get<Fact>(`/${encodeURIComponent(key)}`).then((res) => res.data),
+    client.get<FactEntity>(`/${encodeURIComponent(key)}`).then((res) => res.data),
 
   // updateByPathKey: (update, fact) =>
   //   client
@@ -38,7 +38,7 @@ const FactApiClient: FactAdapter = {
   //   client.get<PathCountResults>(`/?count=path`).then((res) => res.data),
 
   find: ({ keyPrefix }) =>
-    client.get<Fact[]>(`/?keyPrefix=${enc(keyPrefix)}`).then((res) => res.data),
+    client.get<FactEntity[]>(`/?keyPrefix=${enc(keyPrefix)}`).then((res) => res.data),
 
   // findAllFactsByPath: ({ path, limit }) =>
   //   client

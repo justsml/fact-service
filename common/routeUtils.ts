@@ -5,9 +5,7 @@ import { logger } from "./logger";
 import UserError from "./userError";
 
 export function notFoundHandler(request: Request, response: Response) {
-  response
-    .status(404)
-    .send({ error: "Not found!", url: request.originalUrl });
+  response.status(404).send({ error: "Not found!", url: request.originalUrl });
 }
 
 export function errorHandler(
@@ -19,8 +17,8 @@ export function errorHandler(
   logger.error("ERROR %o", error);
   if (error instanceof NotFoundError)
     return response
-    .status(404)
-    .send({ error: error.message ?? "Not found!", url: request.originalUrl });
+      .status(404)
+      .send({ error: error.message ?? "Not found!", url: request.originalUrl });
   const stack = process.env.NODE_ENV !== "production" ? error.stack : undefined;
   const status = error?.status ?? 500;
   response.status(status);
