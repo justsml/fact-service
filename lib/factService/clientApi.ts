@@ -1,6 +1,6 @@
 import axios from "axios";
 // import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactAdapter, FactEntity } from "./types";
+import type { FactAdapter, FactEntity } from "./types";
 
 const FactsConfig = {
   apiUrl: process.env["API_URL"] ?? "http://localhost:3000/api/facts",

@@ -1,9 +1,11 @@
 /* credit: https://github.com/justsml/guides/tree/master/express/setup-guide */
 import App from "./app";
 import { logger } from "./common/logger";
-import { dbAdapter } from "./lib/config";
+import { config, dbAdapter } from "./lib/config";
 
-const port = parseInt(process.env.PORT ?? "3000");
+logger.info(`Starting server with ${dbAdapter} adapter`);
+
+const port = config.port;
 const startMessage = `Started server on http://0.0.0.0:${port}`;
 
 const app = App(dbAdapter);

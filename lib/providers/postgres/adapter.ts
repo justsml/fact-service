@@ -1,13 +1,18 @@
-import type { Fact, FactAdapter } from "../../factService/types";
+import {
+  isFactEntity,
+  type FactAdapter,
+  type FactEntity,
+} from "../../factService/types";
 import knex from "../../../db/knex";
 import { checkPostgresError } from "../../../common/routeUtils";
 import { logger } from "../../../common/logger";
+import { toArray } from "../../../common/arrayUtils";
 
 export const adapter: FactAdapter = {
   _name: "postgres",
 
   set: async (fact) =>
-    await knex<Fact>("fact_store")
+    await knex<FactEntity>("fact_store")
       .insert({ ...fact, updated_at: new Date() })
       .onConflict("key")
       .merge()
@@ -21,32 +26,35 @@ export const adapter: FactAdapter = {
       }),
 
   get: async ({ key }) =>
-    await knex<Fact>("fact_store")
+    await knex<FactEntity>("fact_store")
       .select("*")
       .where({ key })
       .first()
-      .catch(checkPostgresError({ key })),
-
-  del: async ({ key }) =>
-    await knex<Fact>("fact_store")
-      // .whereIn("key", toArray(key))
-      .where({ key: key })
-      .delete()
-      .then((count) => {
-        // console.log("delete.result:", count);
-        return {
-          success: count > 0,
-          count,
-          message: `Deleted any fact with an id equal to ${key}`,
-        };
+      .catch(checkPostgresError({ key }))
+      .then((result) => {
+        if (isFactEntity(result)) return result;
+        return undefined;
       }),
 
+  del: async ({ key }) =>
+    Promise.all([
+      toArray(key).map((key) =>
+        knex<FactEntity>("fact_store").where({ key }).delete(),
+      ),
+    ]).then((results) => {
+      return {
+        success: results.length > 0,
+        count: results.length,
+        message: `Deleted ${results.length} fact(s):`,
+      };
+    }),
+
   find: async ({ keyPrefix }) =>
-    await knex<Fact>("fact_store")
+    await knex<FactEntity>("fact_store")
       .select("*")
       .limit(1_000)
       .whereILike("key", knex.raw(`concat(?::text, '%')`, keyPrefix))
-      .then((rows) => rows as Fact[]),
+      .then((rows) => (rows.every(isFactEntity) ? rows : [])),
 };
 
 export const setup = async () => {

@@ -13,18 +13,16 @@ import {
 import { logger } from "../../../common/logger";
 import { dynamoDbUrl } from "../../config";
 import { NotFoundError, UserError } from "../../factService/errors";
-import type { Fact, FactAdapter } from "../../factService/types";
+import {
+  isFactEntity,
+  type FactAdapter,
+} from "../../factService/types";
 
-const FACT_STORE_TABLE_NAME = process.env.FACT_TABLE_NAME ?? "fact_store";
+const FACT_STORE_TABLE_NAME = process.env["FACT_TABLE_NAME"] ?? "fact_store";
 
 const dynamoDbClient = new DynamoDBClient({
   region: "us-east-1",
-  endpoint: dynamoDbUrl,
-
-  // credentials: {
-  //   accessKeyId: "fake",
-  //   secretAccessKey: "fake",
-  // },
+  endpoint: dynamoDbUrl!,
 });
 
 const docClient = DynamoDBDocumentClient.from(dynamoDbClient);
@@ -36,19 +34,21 @@ const docClient = DynamoDBDocumentClient.from(dynamoDbClient);
 export const adapter: FactAdapter = {
   _name: "dynamo",
 
-  set: async (fact) => {
-    const { key, fact: payload } = fact;
-    const existing = await adapter.get({ key: fact.key }).catch(() => null);
+  async set({key, value, ...rest}) {
+    const existing = await adapter.get({ key: key }).catch(() => null);
     if (existing) {
       logger.debug("Dynamo.exists(%o).update_mode", existing);
-      payload.TIMESTAMP = existing.TIMESTAMP ?? Date.now();
-      payload.created_at = existing.created_at;
+      // @ts-expect-error
+      rest.TIMESTAMP = existing["TIMESTAMP"] ?? Date.now();
+      // @ts-expect-error
+      rest.created_at = existing.created_at;
     }
     const Item = {
-      ...payload,
       KEY: key,
-      TIMESTAMP: payload.TIMESTAMP ?? Date.now(),
-      created_at: payload.created_at ?? new Date().toISOString(),
+      key,
+      value,
+      TIMESTAMP: 'TIMESTAMP' in rest ? rest['TIMESTAMP'] : Date.now(),
+      created_at: 'created_at' in rest ? rest['created_at'] : new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
     logger.debug("Dynamo.set(%o)", Item);
@@ -62,12 +62,14 @@ export const adapter: FactAdapter = {
       )
       .then((result) => {
         logger.debug("PutCommand: %o", result);
-        return Item;
+        if (isFactEntity(Item)) return Item;
+        logger.error({ message: "Invalid fact" }, "Dynamo.set");
+        throw new Error("Invalid fact");
       })
       .catch(autoSetup);
   },
 
-  get: async ({ key }) => {
+  async get({ key }) {
     return docClient
       .send(
         new QueryCommand({
@@ -80,17 +82,21 @@ export const adapter: FactAdapter = {
       .then((result) => {
         if (result.Items && result.Items?.length <= 0)
           return Promise.reject(new NotFoundError(`Fact not found: ${key}`));
-        return result.Items?.[0] as Fact;
+        const item = result.Items?.[0];
+        if (isFactEntity(item)) return item;
+        logger.error({
+          message: "Invalid fact",
+        }, "Dynamo.get");
+        return Promise.reject(new Error(`Invalid fact: ${key}`));
       });
   },
 
-  del: async ({ key }) => {
+  async del({ key }) {
     return docClient
       .send(
         new DeleteCommand({
           TableName: FACT_STORE_TABLE_NAME,
           Key: { KEY: key },
-
           ReturnValues: "ALL_OLD",
         }),
       )
@@ -104,7 +110,7 @@ export const adapter: FactAdapter = {
       });
   },
 
-  find: async ({ keyPrefix }) => {
+  async find({ keyPrefix }) {
     logger.debug("Dynamo.find(%o)", keyPrefix);
     return docClient
       .send(
@@ -127,7 +133,28 @@ export const adapter: FactAdapter = {
         //   },
         // }),
       )
-      .then((result) => result.Items as Fact[]);
+      .then((result) => {
+        const items = result.Items ?? [];
+        const validResults = items.filter(isFactEntity);
+        const validKeysFound = validResults.length;
+        const totalKeysFound = items.length;
+
+        logger.debug(
+          {
+            keyPrefix,
+            validKeysFound,
+            totalKeysFound,
+          },
+          "Dynamo",
+        );
+        if (totalKeysFound > validKeysFound)
+          throw Error(
+            `Error[${this._name}]: Invalid fact(s) found: ${
+              totalKeysFound - validKeysFound
+            }`,
+          );
+        return validResults;
+      });
   },
 };
 

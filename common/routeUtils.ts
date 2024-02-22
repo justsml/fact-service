@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { appEnv } from "../lib/config";
 import { NotFoundError } from "../lib/factService/errors";
 import { logger } from "./logger";
@@ -12,7 +12,7 @@ export function errorHandler(
   error: Error & { status?: number },
   request: Request,
   response: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) {
   logger.error("ERROR %o", error);
   if (error instanceof NotFoundError)
@@ -67,9 +67,9 @@ export const checkPostgresError =
   };
 
 export const checkInvalidInputError =
-  <TContextType = unknown>(context: TContextType | undefined) =>
+  <TContextType = unknown>(_context: TContextType | undefined) =>
   (error: Error) => {
-    if (appEnv !== "development") context = undefined;
+    if (appEnv !== "development") _context = undefined;
 
     logger.error("ERROR %o", error);
     const msg = error.message;

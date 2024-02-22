@@ -2,7 +2,7 @@
 /* credit: https://github.com/justsml/guides/tree/master/express/setup-guide */
 import {getServer} from "./server";
 import { logger } from "../../common/logger";
-import { dbAdapter } from "../../lib/config";
+// import { dbAdapter } from "../../lib/config";
 import { getDataAdapter } from "../../lib/providers";
 
 const port = parseInt(process.env['PORT'] ?? "3000");

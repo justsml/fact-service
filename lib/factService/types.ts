@@ -1,16 +1,37 @@
 import { t } from "elysia";
 import type { DbAdapter } from "../config";
 
-/** FactEntity is the raw database record */
+/**
+ * FactEntity is the raw database record
+ * 
+ * 
+ */
 export type FactEntity = {
+  // [x: string]: number;
   key: string;
-  value: { [key: string]: unknown }; // | string | number | boolean | string[] | number[] | boolean[];
+  value:
+    | { [key: string]: unknown }
+    | string
+    | number
+    | boolean
+    | Array<string | number | boolean>;
 
   created_by?: string;
   updated_by?: string;
-  created_at?: Date | string;
-  updated_at?: Date | string;
+  created_at?: Date | string | number;
+  updated_at?: Date | string | number;
 };
+
+
+/** Type guard for FactEntity */
+export const isFactEntity = (obj: unknown): obj is FactEntity => {
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+  const { key, value } = obj as FactEntity;
+  return typeof key === "string" && (typeof value === "object" || typeof value === "string" || typeof value === "number" || typeof value === "boolean" || Array.isArray(value));
+};
+
 
 export const FactResponseTypeDef = t.Object({
   key: t.String(),
@@ -23,22 +44,19 @@ export const FactResponseTypeDef = t.Object({
   ]),
   created_by: t.String(),
   updated_by: t.String(),
-  created_at: t.Date({}),
-  updated_at: t.Date({}),
+  created_at: t.Union([t.Date({}), t.String(), t.Number()]),
+  updated_at: t.Union([t.Date({}), t.String(), t.Number()]),
 });
 
 /** Fact is the API response */
 export interface Fact {
   [key: string]: unknown;
-  created_at?: Date | string;
-  updated_at?: Date | string;
+  created_at?: Date | string | number;
+  updated_at?: Date | string | number;
 }
 
 /** KeyFact describes the input for update/set */
-export type KeyFact = {
-  key: string;
-  value: Fact;
-};
+export type KeyFact = Pick<FactEntity, "key" | "value">;
 
 // /** PathCountResults is the response from getPathCounts (`/api/stats`) */
 // export type PathCountResults = Record<string, number>;

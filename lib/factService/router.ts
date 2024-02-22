@@ -87,11 +87,11 @@ export function factApiRouter(factsDbClient: FactAdapter) {
   }
 }
 
-export function statsApiRouter(factsDbClient: FactAdapter) {
+export function statsApiRouter(_factsDbClient: FactAdapter) {
   return express
     .Router()
     .route("/stats/:mode?")
-    .get((req, res) => res.status(420).json({ message: "Not implemented!" }));
+    .get((_req, res) => res.status(420).json({ message: "Not implemented!" }));
 
   // function getFactStats(
   //   request: Request,

@@ -1,11 +1,12 @@
 #!/usr/bin/env yarn ts-node
 
 import { testAdapters } from "../lib/config";
+// import type { FactAdapter } from "../lib/factService/types";
 import { getSetup } from "../lib/providers";
 
 (async () => {
   const results = Promise.allSettled(
-    testAdapters.map(async (adapter) => {
+    testAdapters.map(async (adapter: string) => {
       const setupFn = getSetup(adapter);
       const result = await setupFn();
       return [adapter, result];
