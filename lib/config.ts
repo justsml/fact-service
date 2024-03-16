@@ -12,7 +12,7 @@ export const AvailableAdapters = [
   "dynamo",
   "firestore",
   "cassandra",
-  "foundation",
+  // "foundation",
 ] as const;
 
 export type DbAdapter = typeof AvailableAdapters[number];
@@ -52,13 +52,14 @@ export const config = yargs(hideBin(process.argv))
   .option("testAdapters", {
     alias: "A",
     type: "array",
+    default: process.env["TEST_ADAPTERS"]?.split(" ") ?? null,
     description: "Sets the adapters to use for testing",
     choices: AvailableAdapters,
   })
   .option("logLevel", {
     alias: "l",
     type: "string",
-    default: "info",
+    default: process.env["LOG_LEVEL"] ?? "info",
     description: "Sets the level of logging",
   })
   .option("databaseUrl", {

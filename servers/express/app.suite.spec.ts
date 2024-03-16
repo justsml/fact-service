@@ -2,11 +2,15 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import supertest from "supertest";
 import app from "./app";
 import { faker } from "@faker-js/faker";
-import { AvailableAdapters, type DbAdapter } from "../../lib/config";
+import { config, AvailableAdapters, type DbAdapter } from "@/config";
 import { omit } from "lodash";
 
-const basePath = `/api/facts`;
-const testAdapters = AvailableAdapters; 
+const basePath = `/api`;
+let testAdapters = [...AvailableAdapters]; 
+
+if (config.testAdapters) {
+  testAdapters = config.testAdapters as DbAdapter[];
+}
 
 const getHeaders = () => ({
   Authorization: "Bearer tahjisheiPaa9taem3oo",
@@ -28,21 +32,21 @@ describe.each(testAdapters.map((a) => a.toUpperCase()))(
       it(`Create batch: ${users.length}`, async () => {
         for await (const user of users) {
           const response = await request
-            .post(`${basePath}/${user.key}`)
+            .post(`${basePath}/facts/${user.key}`)
             .set(getHeaders())
             .send(user);
 
           // console.log(response.body);
           expect(response.status).toBe(201);
           const expected = omit(user, ["id", "birthday"]);
-          expect(response.body).toMatchObject(expected);
+          expect(response.body?.value).toMatchObject(expected);
         }
       });
 
       it(`Remove batch: ${users.length}`, async () => {
         for await (const user of users) {
           const response = await request
-            .delete(`${basePath}/${user.key}`)
+            .delete(`${basePath}/facts/${user.key}`)
             .set(getHeaders());
 
           expect(response.status).toBe(204);
@@ -55,20 +59,20 @@ describe.each(testAdapters.map((a) => a.toUpperCase()))(
       beforeAll(async () => {
         for await (const user of users) {
           await request
-            .post(`${basePath}/${user.key}`)
+            .post(`${basePath}/facts/${user.key}`)
             .set(getHeaders())
             .send(user);
         }
       });
       afterAll(async () => {
         for await (const user of users) {
-          await request.delete(`${basePath}/${user.key}`).set(getHeaders());
+          await request.delete(`${basePath}/facts/${user.key}`).set(getHeaders());
         }
       });
 
-      it(`PUT ${basePath}/user/456`, async () => {
+      it(`PUT ${basePath}/facts/user/456`, async () => {
         const response = await request
-          .put(`${basePath}/user/456`)
+          .put(`${basePath}/facts/user/456`)
           .set(getHeaders())
           .send({
             path: "user",
@@ -79,9 +83,9 @@ describe.each(testAdapters.map((a) => a.toUpperCase()))(
         expect(response.status).toBe(201);
       });
 
-      it(`POST ${basePath}/user/123`, async () => {
+      it(`POST ${basePath}/facts/user/123`, async () => {
         const response = await request
-          .post(`${basePath}/user/123`)
+          .post(`${basePath}/facts/user/123`)
           .set(getHeaders())
           .send({
             note: "posted!",
@@ -93,32 +97,32 @@ describe.each(testAdapters.map((a) => a.toUpperCase()))(
         expect(response.body).toHaveProperty("updated_at");
       });
 
-      it(`GET ${basePath}/user/123`, async () => {
+      it(`GET ${basePath}/facts/user/123`, async () => {
         const response = await request
-          .get(`${basePath}/user/123`)
+          .get(`${basePath}/facts/user/123`)
           .set(getHeaders());
 
         expect(response.status).toBe(200);
         expect(response.body).toHaveProperty("created_at");
         expect(response.body).toHaveProperty("updated_at");
-        expect(response.body).toMatchObject({
+        expect(response.body.value).toMatchObject({
           note: "posted!",
           value: '{"json": true, "updated": "🚀"}',
         });
       });
 
-      it(`GET ${basePath}/?keyPrefix=user`, async () => {
+      it(`GET ${basePath}/query/user`, async () => {
         const response = await request
-          .get(`${basePath}/?keyPrefix=user`)
+          .get(`${basePath}/query/user`)
           .set(getHeaders());
 
         expect(response.status).toBe(200);
         expect(response.body.length).toBeGreaterThanOrEqual(20);
       });
 
-      it(`DELETE ${basePath}/user/123`, async () => {
+      it(`DELETE ${basePath}/facts/user/123`, async () => {
         const response = await request
-          .delete(`${basePath}/user/123`)
+          .delete(`${basePath}/facts/user/123`)
           .set(getHeaders());
 
         expect(response.status).toBe(204);
