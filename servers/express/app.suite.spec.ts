@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { faker } from "@faker-js/faker";
 import supertest from "supertest";
 import app from "./app";
-import { type DbAdapter, testAdapters } from "./lib/config";
+import { faker } from "@faker-js/faker";
+import { AvailableAdapters, type DbAdapter } from "../../lib/config";
 import { omit } from "lodash";
 
 const basePath = `/api/facts`;
+const testAdapters = AvailableAdapters; 
 
 const getHeaders = () => ({
   Authorization: "Bearer tahjisheiPaa9taem3oo",
@@ -17,7 +18,7 @@ const getHeaders = () => ({
 
 describe.each(testAdapters.map((a) => a.toUpperCase()))(
   `Test: %s`,
-  (adapter) => {
+  (adapter: DbAdapter) => {
     adapter = adapter.toLowerCase() as DbAdapter;
     const request = supertest(app(adapter as DbAdapter));
 

@@ -1,16 +1,11 @@
 // credit: https://github.com/justsml/guides/tree/master/express/setup-guide
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
-// import { request } from "http";
-import { logger } from "../../common/logger";
-import UserError from "../../common/userError";
-// import { createTable, dropTable } from "../providers/dynamoDb/adapter";
-import type { FactAdapter } from "./types";
+import { logger } from "@/common/logger";
+import { UserError } from "@/factService/errors";
+import type { FactAdapter } from "@//factService/types";
 
-const keyPathPattern = "/:key([a-zA-Z0-9-:/]{0,})";
-
-// dropTable().then(() => logger.log("Table dropped!"));
-// createTable().then(() => logger.log("Table created!"));
+const keyPathPattern = "/:key*";
 
 export function factApiRouter(factsDbClient: FactAdapter) {
   return express
@@ -35,7 +30,7 @@ export function factApiRouter(factsDbClient: FactAdapter) {
     const { key } = request.params;
     const { keyPrefix } = request.query;
 
-    if (!key && !keyPrefix) return next(new UserError("Key is required!"));
+    if (!key && !keyPrefix) return next(UserError("Key is required!"));
 
     if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
       logger.debug("getByPrefix(%s*)", keyPrefix);
@@ -57,9 +52,9 @@ export function factApiRouter(factsDbClient: FactAdapter) {
     const { key } = request.params;
     const { ...payload } = request.body;
     if (key == undefined || `${key}`.length < 1)
-      return next(new UserError("Key is required!"));
+      return next(UserError("Key is required!"));
     if (payload == undefined || `${payload}`.length < 1)
-      return next(new UserError("payload is required!"));
+      return next(UserError("payload is required!"));
 
     factsDbClient
       .set({ key, value: payload })
@@ -73,7 +68,7 @@ export function factApiRouter(factsDbClient: FactAdapter) {
   function remove(request: Request, response: Response, next: NextFunction) {
     const { key } = request.params;
     if (key == undefined || `${key}`.length < 1)
-      return next(new UserError("key is required!"));
+      return next(UserError("key is required!"));
 
     logger.info("Removing %s", key);
     factsDbClient

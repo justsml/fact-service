@@ -1,7 +1,7 @@
 /* credit: https://github.com/justsml/guides/tree/master/express/setup-guide */
 import App from "./app";
-import { logger } from "./common/logger";
-import { config, dbAdapter } from "./lib/config";
+import { logger } from "../../common/logger";
+import { config, dbAdapter } from "../../lib/config";
 
 logger.info(`Starting server with ${dbAdapter} adapter`);
 

@@ -2,7 +2,7 @@ import { describe, it, expect, bench } from "vitest";
 import { faker } from "@faker-js/faker";
 import supertest from "supertest";
 import app from "./app";
-import { dbAdapter } from "./lib/config";
+import { dbAdapter } from "../../lib/config";
 
 const request = supertest(app());
 const authorization = "Bearer tahjisheiPaa9taem3oo";

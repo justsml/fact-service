@@ -3,8 +3,8 @@ import type { DbAdapter } from "../config";
 
 /**
  * FactEntity is the raw database record
- * 
- * 
+ *
+ *
  */
 export type FactEntity = {
   // [x: string]: number;
@@ -22,16 +22,21 @@ export type FactEntity = {
   updated_at?: Date | string | number;
 };
 
-
 /** Type guard for FactEntity */
 export const isFactEntity = (obj: unknown): obj is FactEntity => {
   if (typeof obj !== "object" || obj === null) {
     return false;
   }
   const { key, value } = obj as FactEntity;
-  return typeof key === "string" && (typeof value === "object" || typeof value === "string" || typeof value === "number" || typeof value === "boolean" || Array.isArray(value));
+  return (
+    typeof key === "string" &&
+    (typeof value === "object" ||
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      Array.isArray(value))
+  );
 };
-
 
 export const FactResponseTypeDef = t.Object({
   key: t.String(),
@@ -42,10 +47,10 @@ export const FactResponseTypeDef = t.Object({
     t.Number(),
     t.Boolean(),
   ]),
-  created_by: t.String(),
-  updated_by: t.String(),
-  created_at: t.Union([t.Date({}), t.String(), t.Number()]),
-  updated_at: t.Union([t.Date({}), t.String(), t.Number()]),
+  created_by: t.Optional(t.String()),
+  updated_by: t.Optional(t.String()),
+  created_at: t.Optional(t.Union([t.Date({}), t.String(), t.Number()])),
+  updated_at: t.Optional(t.Union([t.Date({}), t.String(), t.Number()])),
 });
 
 /** Fact is the API response */

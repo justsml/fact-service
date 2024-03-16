@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import { appEnv } from "../lib/config";
-import { NotFoundError } from "../lib/factService/errors";
+import { NotFoundError, UserError } from "../lib/factService/errors";
 import { logger } from "./logger";
-import UserError from "./userError";
+// import UserError from "./userError";
 
 export function notFoundHandler(request: Request, response: Response) {
   response.status(404).send({ error: "Not found!", url: request.originalUrl });
@@ -74,7 +74,7 @@ export const checkInvalidInputError =
     logger.error("ERROR %o", error);
     const msg = error.message;
     const lastPart = msg.split(`invalid input`)[1];
-    if (lastPart) throw new UserError(`Database Error: ${lastPart}`);
+    if (lastPart) throw UserError(`Database Error: ${lastPart}`);
     throw error;
   };
 
@@ -83,7 +83,7 @@ export const checkDuplicateKeyError =
   (error: Error) => {
     if (appEnv !== "development") context = undefined;
     if (error.message.includes("duplicate key")) {
-      throw new UserError(
+      throw UserError(
         `Fact already exists! Context: ${JSON.stringify(context)}`,
       );
     }
@@ -98,7 +98,7 @@ export const checkRelationError =
       const msg = error.message
         .split(" - column")[1]
         .replace("relation", "table");
-      throw new UserError(
+      throw UserError(
         `Database error: ${msg}. Context: ${JSON.stringify(context)}`,
       );
     }

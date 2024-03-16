@@ -2,12 +2,12 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import ms from "ms";
-import { factApiRouter } from "./lib/factService/router";
-import { verifyTokenMiddleware } from "./lib/auth";
-import { httpLogger } from "./common/logger";
-import { notFoundHandler, errorHandler } from "./common/routeUtils";
-import { getDataAdapter } from "./lib/providers";
-import { dbAdapter } from "./lib/config";
+import { factApiRouter } from "./router";
+import { verifyTokenMiddleware } from "@/auth";
+import { httpLogger } from "@/common/logger";
+import { notFoundHandler, errorHandler } from "@/common/routeUtils";
+import { getDataAdapter } from "@/providers";
+import { dbAdapter } from "@/config";
 
 // const dataAdapter = getDataAdapter();
 // const factRouter = factApiRouter(dataAdapter);

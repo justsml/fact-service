@@ -1,7 +1,7 @@
 import { isFactEntity, type FactAdapter } from "../../factService/types";
 import { Firestore } from "@google-cloud/firestore";
 import { logger } from "../../../common/logger";
-import { isArray } from "lodash";
+import isArray from "lodash/isArray";
 
 const firestore = new Firestore({
   projectId: process.env["FIRESTORE_PROJECT_ID"],

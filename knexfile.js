@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 const debugMode = process.env.DEBUG_MODE || false;
 
-require("dotenv").config();
 
 const { DATABASE_URL, DATABASE_URI } = process.env;
 const databaseUrl = DATABASE_URL || DATABASE_URI;
@@ -20,7 +22,7 @@ const connectionConfig = {
   debug: Boolean(debugMode),
 };
 
-module.exports = {
+export default {
   development: connectionConfig,
   staging: connectionConfig,
   production: connectionConfig,

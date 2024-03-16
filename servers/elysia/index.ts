@@ -1,14 +1,14 @@
-
 /* credit: https://github.com/justsml/guides/tree/master/express/setup-guide */
-import {getServer} from "./server";
+import { getServer } from "./server";
 import { logger } from "../../common/logger";
 // import { dbAdapter } from "../../lib/config";
 import { getDataAdapter } from "../../lib/providers";
 
-const port = parseInt(process.env['PORT'] ?? "3000");
+const port = parseInt(process.env["PORT"] ?? "3000");
 const startMessage = `Started server on http://0.0.0.0:${port}`;
 
-const adapter = getDataAdapter('postgres');
+const adapter = getDataAdapter("postgres");
+logger.info(`Starting ELYSIA server + ${adapter._name} adapter on :${port}`);
 const server = getServer(adapter);
 
 server

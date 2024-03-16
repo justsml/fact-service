@@ -1,12 +1,12 @@
 import { Elysia, t } from "elysia";
 import { bearer } from "@elysiajs/bearer";
 import { cors } from "@elysiajs/cors";
+import swagger from "@elysiajs/swagger";
 import { logger } from "@/common/logger";
-import type { FactAdapter } from "@/factService/types";
-import UserError from "../../common/userError";
+import { FactResponseTypeDef, type FactAdapter } from "@/factService/types";
 import { openApi } from "./handlers/swagger";
 import { errorHandler } from "./handlers/errors";
-import swagger from "@elysiajs/swagger";
+import { UserError } from "../../lib/factService/errors";
 
 export type FactApp = ReturnType<typeof getServer>;
 
@@ -20,7 +20,7 @@ export function getServer(factsDbClient: FactAdapter) {
 
     .use(
       swagger({
-        path: "/swagger.yml",
+        path: "/swagger",
         documentation: {
           info: {
             title: "Fact Service",
@@ -35,7 +35,7 @@ export function getServer(factsDbClient: FactAdapter) {
       const key = params["*"];
       const { keyPrefix } = query;
 
-      if (!key && !keyPrefix) throw new UserError("Key is required!");
+      if (!key && !keyPrefix) throw UserError("Key is required!");
 
       if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
         logger.debug("getByPrefix(%s*)", keyPrefix);
@@ -55,10 +55,10 @@ export function getServer(factsDbClient: FactAdapter) {
         let value = body;
         if (typeof body === "string") value = JSON.stringify(body);
         if (typeof body !== "object")
-          throw new UserError("Value must be an object!");
+          throw UserError("Value must be an object!");
 
-        if (!key) throw new UserError("Key is required!");
-        if (!value) throw new UserError("Value is required!");
+        if (!key) throw UserError("Key is required!");
+        if (!value) throw UserError("Value is required!");
 
         logger.debug("put(%s, %s)", key, value);
 
@@ -74,7 +74,7 @@ export function getServer(factsDbClient: FactAdapter) {
         let { keyPrefix } = query;
         if (!keyPrefix) keyPrefix = key;
 
-        if (!key && !keyPrefix) throw new UserError("Key is required!");
+        if (!key && !keyPrefix) throw UserError("Key is required!");
 
         if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
           logger.debug("getByPrefix(%s*)", keyPrefix);
@@ -82,7 +82,7 @@ export function getServer(factsDbClient: FactAdapter) {
             .find({ keyPrefix: `${keyPrefix}` })
             .then((facts) => facts);
         } else {
-          throw new UserError("KeyPrefix is required!");
+          throw UserError("KeyPrefix is required!");
         }
       },
       {
@@ -91,6 +91,7 @@ export function getServer(factsDbClient: FactAdapter) {
           description: "Get a fact by key",
           tags: ["facts"],
         },
+        response: t.Array(FactResponseTypeDef),
       },
     )
     .use(openApi);
@@ -100,7 +101,7 @@ export function getServer(factsDbClient: FactAdapter) {
   //     const key = params["*"];
   //     const { keyPrefix } = query;
 
-  //     if (!key && !keyPrefix) throw new UserError("Key is required!");
+  //     if (!key && !keyPrefix) throw UserError("Key is required!");
 
   //     if (keyPrefix != null && `${keyPrefix}`.length >= 1) {
   //       logger.debug("getByPrefix(%s*)", keyPrefix);
