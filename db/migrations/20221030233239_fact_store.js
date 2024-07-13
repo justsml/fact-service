@@ -3,14 +3,16 @@
  * @returns { Promise<void> }
  */
 exports.up = async function (knex) {
-  return knex.schema
-    .createTable("fact_store", (table) => {
-      table.string("key", 500).primary();
-      table.jsonb("fact").notNullable();
-      table.timestamps(true, true);
-    })
-    .then(() => console.log("!!! created table fact_store !!!"))
-    .catch((err) => console.error(err));
+  if (await knex.schema.hasTable("fact_store")) return;
+
+  return knex.schema.createTable("fact_store", (table) => {
+    table.bigIncrements("id").primary();
+    table.string("path", 256).notNullable();
+    table.string("key", 64).notNullable();
+    table.jsonb("value");
+    table.timestamps(true, true);
+    table.unique(["path", "key"]);
+  });
 };
 
 /**
@@ -18,8 +20,5 @@ exports.up = async function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-  return knex.schema
-    .dropTableIfExists("fact_store")
-    .then(() => console.log("!!! dropped table fact_store !!!"))
-    .catch((err) => console.error(err));
+  return knex.schema.dropTableIfExists("fact_store");
 };
