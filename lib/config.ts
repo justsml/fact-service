@@ -52,9 +52,15 @@ export const config = yargs(hideBin(process.argv))
   .option("testAdapters", {
     alias: "A",
     type: "array",
-    default: process.env["TEST_ADAPTERS"]?.split(" ") ?? null,
+    default: process.env["TEST_ADAPTERS"]?.split(" ") ?? [],
     description: "Sets the adapters to use for testing",
     choices: AvailableAdapters,
+  })
+  .option("testTargetUrl", {
+    alias: "T",
+    type: "string",
+    default: process.env["TEST_TARGET"] ?? undefined,
+    description: "Sets the target URL for testing an HTTP target",
   })
   .option("logLevel", {
     alias: "l",

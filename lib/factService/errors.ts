@@ -39,11 +39,11 @@ class _UserError extends Error {
     });
   }
 }
-export function UserError(message: string) {
+
+export function UserError(this: unknown, message: string) {
   if (!(this instanceof UserError)) return new _UserError(message);
   return new _UserError(message);
 }
-
 
 export class ServerError extends Error {
   status: number = 500;

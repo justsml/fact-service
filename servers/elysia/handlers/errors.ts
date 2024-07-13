@@ -1,5 +1,5 @@
 import type { ErrorHandler } from "elysia";
-import { logger } from "@/common/logger";
+import { logger } from "../../../common/logger";
 // import e from "express";
 
 export const errorHandler: ErrorHandler = ({ error, path, query, request }) => {

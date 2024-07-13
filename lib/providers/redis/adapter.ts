@@ -7,28 +7,33 @@ import {
 // import { ulid } from "ulidx";
 import { NotFoundError } from "../../factService/errors";
 import { logger } from "../../../common/logger";
+import { registerErrorHandlerLimit } from "../../factService/factHelpers";
 
 const redis = new Redis(process.env["REDIS_URL"] || "redis://0.0.0.0:6379");
+registerErrorHandlerLimit(redis, "Check your REDIS Connection String", 10);
 
 export const adapter: FactAdapter = {
   _name: "redis",
 
   async set({ key, value, ...rest }) {
-    const payload: Omit<FactEntity, "key"> = {
-      value,
+    const payload: FactEntity = {
+      key,
+      value: JSON.stringify(value),
       // id: value.id ?? ulid(),
       updated_at: new Date().toISOString(),
       created_at:
         "created_at" in rest ? `${rest.created_at}` : new Date().toISOString(),
     };
     await redis.hset(key, payload);
-    return { key, ...payload };
+    return { ...payload, value: JSON.parse(`${payload.value}`) };
   },
 
   async get({ key }): Promise<FactEntity> {
     const exists = await redis.exists(key);
     if (!exists) throw new NotFoundError(`Fact not found: ${key}`);
     const result = await redis.hgetall(key);
+    result["value"] = JSON.parse(`${result["value"]}`);
+    logger.debug("REDIS.get(%s) %j", key, result);
     return isFactEntity(result)
       ? result
       : Promise.reject(Error(`Invalid fact: ${key}`));
@@ -53,6 +58,8 @@ export const adapter: FactAdapter = {
     let cursor = "0";
     const keys: string[] = [];
 
+    logger.debug("redis:find(%s*)", keyPrefix);
+
     do {
       const [nextCursor, scanKeys] = await redis.scan(
         cursor,
@@ -76,7 +83,16 @@ export const adapter: FactAdapter = {
     for (let i = 0; i < keys.length; i += batchSize) {
       const batchKeys = keys.slice(i, i + batchSize);
       const batchValues = await Promise.all(
-        batchKeys.map((key) => redis.hgetall(key)),
+        batchKeys.map((key) =>
+          redis.hgetall(key).then((result) => {
+            try {
+              result["value"] = JSON.parse(`${result["value"]}`);
+            } catch (error) {
+              // ignore
+            }
+            return result;
+          }),
+        ),
       );
       values.push(...batchValues);
     }

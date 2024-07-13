@@ -1,6 +1,6 @@
-import swagger from "@elysiajs/swagger";
+import { swagger } from "@elysiajs/swagger";
 
-export const openApi = swagger({
+export default swagger({
   path: "/swagger.yml",
   documentation: {
     info: {
@@ -9,4 +9,4 @@ export const openApi = swagger({
       description: "Fact Service API",
     },
   },
-})
+});

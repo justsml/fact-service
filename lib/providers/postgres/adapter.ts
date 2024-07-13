@@ -36,9 +36,7 @@ export const adapter: FactAdapter = {
       .catch(checkPostgresError({ key }))
       .then((result) => {
         if (!result)
-          throw Object.assign(new NotFoundError(`Fact not found: ${key}`), {
-            status: 404,
-          });
+          throw new NotFoundError(`Fact not found: ${key}`);
         if (isFactEntity(result)) return result;
         logger.warn("Fact Schema Invalid: %o", result);
         throw Error(`Fact Schema Invalid: ${key}`);

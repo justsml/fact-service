@@ -2,17 +2,17 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import ms from "ms";
-import { factApiRouter } from "./router";
 import { verifyTokenMiddleware } from "@/auth";
 import { httpLogger } from "@/common/logger";
 import { notFoundHandler, errorHandler } from "@/common/routeUtils";
-import { getDataAdapter } from "@/providers";
-import { dbAdapter } from "@/config";
+import { dbAdapter, type DbAdapter } from "@/config";
+import { factsRouter } from "./routes/facts";
+import { queryRouter } from "./routes/query";
 
 // const dataAdapter = getDataAdapter();
-// const factRouter = factApiRouter(dataAdapter);
+// const factRouter = factsRouter(dataAdapter);
 
-export default (adapter = dbAdapter) =>
+export default (adapter = dbAdapter as DbAdapter) =>
   express()
     .use(helmet())
     .use(express.query({ parseArrays: false }))
@@ -21,6 +21,7 @@ export default (adapter = dbAdapter) =>
     .use(httpLogger)
     .use(cors({ origin: true, credentials: true, maxAge: ms("1 month") }))
     .use(verifyTokenMiddleware)
-    .use("/api/facts", factApiRouter(getDataAdapter(adapter)))
+    .use("/api/query", queryRouter(adapter))
+    .use("/api/facts", factsRouter(adapter))
     .use(notFoundHandler)
     .use(errorHandler);

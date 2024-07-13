@@ -6,10 +6,11 @@
     "module": "ESNext",
     "moduleDetection": "force",
     "jsx": "react-jsx", // support JSX
+    "outDir": "dist",
     "allowJs": true, // allow importing `.js` from `.ts`
     "sourceMap": true,
-    "declarationMap": true,
-    "declaration": true,
+    // "declarationMap": true,
+    "declaration": false,
     // Bundler mode
     "moduleResolution": "Bundler",
     // "allowImportingTsExtensions": true,
@@ -33,8 +34,8 @@
     "noPropertyAccessFromIndexSignature": true,
 
     "paths": {
-      "@/common/*": ["common/*"],
-      "@/*": ["lib/*"]
+      "@/common/*": ["./common/*"],
+      "@/*": ["./lib/*"]
     },
     "types": ["bun-types", "node"]
   },

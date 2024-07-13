@@ -3,24 +3,8 @@ import type { DbAdapter } from "../config";
 
 /**
  * FactEntity is the raw database record
- *
- *
  */
-export type FactEntity = {
-  // [x: string]: number;
-  key: string;
-  value:
-    | { [key: string]: unknown }
-    | string
-    | number
-    | boolean
-    | Array<string | number | boolean>;
-
-  created_by?: string;
-  updated_by?: string;
-  created_at?: Date | string | number;
-  updated_at?: Date | string | number;
-};
+export type FactEntity  = (typeof FactResponseTypeDef)["static"];
 
 /** Type guard for FactEntity */
 export const isFactEntity = (obj: unknown): obj is FactEntity => {
@@ -86,7 +70,7 @@ export interface FactAdapter {
   /** Create/update a Fact, key & payload */
   set: ({ key, value }: KeyFact) => Promise<FactEntity | FactEntity[]>;
   /** Delete a Fact by id */
-  del: ({ key }: { key: string | string[] }) => Promise<BatchResultMessage>;
+  del: ({ key }: { key: string }) => Promise<BatchResultMessage>;
   /** Find all facts matching a path and one or more keys. */
   find: ({ keyPrefix }: { keyPrefix: string }) => Promise<FactEntity[]>;
   /** Find all facts by path */

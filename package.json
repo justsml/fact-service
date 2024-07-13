@@ -1,8 +1,9 @@
 {
   "name": "fact-service",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
-  "description": "Enhanced Key-Value lookup service. Uses Nodejs, TypeScript, Express & Knex Project.",
+  "description": "Starter Key-Value Platform + API. Feat. Nodejs, TypeScript, Express & Knex Project. Supports Postgres, Redis, DynamoDB, Firestore, Cassandra & more.",
+  
   "main": "index.js",
   "bin": {
     "fact-cli": "./bin/fact-cli"
@@ -36,32 +37,39 @@
     "nodejs",
     "typescript",
     "express",
-    "knex"
+    "knex",
+    "postgres",
+    "postgresql",
+    "redis",
+    "dynamodb",
+    "cassandra",
+    "firestore",
+    "api"
   ],
   "author": {
     "name": "Dan Levy",
     "url": "https://danlevy.net"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=16.14.0",
     "npm": ">=7.0.0",
     "yarn": ">=1.22.0"
   },
   "engineStrict": true,
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.478.0",
-    "@aws-sdk/lib-dynamodb": "^3.478.0",
-    "@elite-libs/auto-config": "^1.4.1",
-    "@elysiajs/bearer": "^0.8.0",
-    "@elysiajs/cors": "^0.8.0",
-    "@elysiajs/swagger": "^0.8.5",
+    "@aws-sdk/client-dynamodb": "^3.535.0",
+    "@aws-sdk/lib-dynamodb": "^3.535.0",
+    "@bogeychan/elysia-logger": "^0.0.18",
+    "@elysiajs/bearer": "^1.0.0",
+    "@elysiajs/cors": "^1.0.0",
+    "@elysiajs/swagger": "^1.0.0",
     "@google-cloud/firestore": "^7.1.0",
     "axios": "^1.6.8",
     "cassandra-driver": "^4.7.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "elysia": "^0.8.17",
+    "elysia": "^1.0.1",
     "elysia-helmet": "^1.0.2",
     "express": "^4.18.2",
     "helmet": "^7.1.0",
