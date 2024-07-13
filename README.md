@@ -5,6 +5,7 @@
 - [Overview](#overview)
 - [Getting Started](#getting-started)
   - [Create `.env.local` file](#create-envlocal-file)
+- [Test Database Integrations](#test-database-integrations)
   - [Initialize Database](#initialize-database)
   - [Start Service](#start-service)
 - [Testing](#testing)
@@ -37,7 +38,18 @@ Configure access with the `ALLOWED_TOKENS` environment variable. This is a space
 
 Edit any environment variables as needed.
 
+## Test Database Integrations
+
+```sh
+yarn test:pg
+yarn test:redis
+yarn test:dynamo
+yarn test:cassandra
+```
+
 ### Initialize Database
+
+#### Create a Postgres Database
 
 ```sh
 mkdir -p $HOME/.postgres-data
@@ -57,6 +69,58 @@ docker run \
     -c 'max_connections=200'
 ```
 
+#### Start Redis Database (Optional)
+
+DragonflyDB is a Redis-compatible database that can be used as a drop-in replacement for Redis.
+
+```sh
+docker run --name fact-svc-dragonfly \
+  --detach \
+  -p 6379:6379 --ulimit memlock=-1 \
+  docker.dragonflydb.io/dragonflydb/dragonfly
+```
+
+#### Start Local DynamoDB (Optional)
+
+```sh
+docker run --name fact-svc-dynamodb \
+  --detach \
+  -p 8000:8000 \
+  amazon/dynamodb-local
+  
+```
+
+#### Start Local Cassandra (Optional)
+
+```sh
+docker run -d --name cassandra \
+  --hostname cassandra \
+  cassandra
+```
+
+#### Start Local Firestore (Optional)
+
+```sh
+docker run --name fact-svc-firestore \
+  --detach \
+  -p 8080:8080 \
+  -e FIRESTORE_PROJECT_ID=${FIRESTORE_PROJECT_ID:-fact-svc} \
+  google/cloud-sdk:latest \
+  gcloud beta emulators firestore start --host-port=${HOST_PORT}
+```
+
+#### Start Local ClickHouse Server (Optional)
+
+```sh
+docker run -d --name clickhouse-server \
+  --cap-add=SYS_NICE \
+  --cap-add=IPC_LOCK \
+  --ulimit nofile=262144:262144 \
+  -p 8123:8123 -p 9000:9000 -p 9009:9009 -p 9363:9363 \
+  clickhouse/clickhouse-server:23.2
+```
+
+
 ### Start Service
 
 ```sh
@@ -75,7 +139,7 @@ npm start
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:3000/api/facts \
+  --url http://127.0.0.1:4000/api/facts/user:456 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -87,7 +151,7 @@ curl --request PUT \
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:3000/api/facts \
+  --url http://127.0.0.1:4000/api/facts/user:789 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -104,7 +168,7 @@ curl --request PUT \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:3000/api/facts?path=user&key=123%2C456'
+  --url 'http://127.0.0.1:4000/api/facts/user?matchSuffix=456,789'
 ```
 
 #### Get the count for every unique path
@@ -112,7 +176,7 @@ curl --request GET \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:3000/api/facts/stats/path-count'
+  --url 'http://127.0.0.1:4000/api/stats/path-count'
 ```
 
 ```json
@@ -129,7 +193,7 @@ Finds all Facts matching the path `user`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:3000/api/facts/user
+  --url http://127.0.0.1:4000/api/facts/user
 ```
 
 Finds all Facts matching the path `user/overrides`.
@@ -137,7 +201,7 @@ Finds all Facts matching the path `user/overrides`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:3000/api/facts/user%2Foverrides
+  --url http://127.0.0.1:4000/api/facts/user%2Foverrides
 # Note the URI Escaped path: user%2Foverrides (i.e. user/overrides)
 ```
 
@@ -145,7 +209,7 @@ curl --request GET \
 
 ```sh
 curl --request POST \
-  --url http://127.0.0.1:3000/api/facts/3 \
+  --url http://127.0.0.1:4000/api/facts/3 \
   --header 'Content-Type: application/json' \
   --data '{
   "path": "user",
@@ -156,12 +220,29 @@ curl --request POST \
 
 ## TODO
 
-- [ ] Convert this to yarn workspaces (Monorepo). Add `fact-editor` project, deployment, etc.
+- [ ] Add Elysia server example.
+- [x] Add integration tests.
+- [x] Add benchmark scripts.
+- [x] Example of simple CLI w/ Bash ([View CLI Source](/bin/fact-cli))
+- [ ] Simplify Key/Path pattern. (e.g. `['user', 123]` -> `user:123`)
+- [ ] Add `FactStore` interface & implementations.
+  - [x] Postgres
+  - [x] Redis
+  - [x] DynamoDB
+  - [ ] Firestore
+  - [ ] FoundationDB
+  - [ ] Cassandra
+  - [ ] S3?
+  - [ ] ClickHouse
+  - [ ] ???
+- [ ] Convert to workspace (Monorepo).
+  - [ ] Add `fact-editor` project, deployment, etc.
+- [ ] Make native ESM all the way through.
 
 ### Features & Patterns
 
 - [ ] Add Dockerfile & compose configs.
-  - [ ] Set up ECS + Fargate deployment. (Terraform? CDK? CFN?)
+  - [ ] Set up ECS + Fargate deployment. (Terraform? CDK? CF?)
 - [ ] Make API more RESTful.
   - [ ] Use `PUT` & `POST` (`PATCH`?) for creating and updating Facts.
   - [ ] Use `GET` for querying Facts.

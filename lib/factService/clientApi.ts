@@ -1,6 +1,6 @@
 import axios from "axios";
-import { toArray } from "../../common/arrayUtils";
-import type { Fact, FactService, PathCountResults } from "./types";
+// import { toArray } from "../../common/arrayUtils";
+import type { Fact, FactAdapter } from "./types";
 
 const FactsConfig = {
   apiUrl: process.env.API_URL ?? "http://localhost:3000/api/facts",
@@ -19,41 +19,35 @@ const enc = encodeURIComponent;
 /**
  * This is the HTTP client for the FactService.
  */
-const FactApiClient: FactService = {
-  create: (fact) => client.put(`/`, fact),
+const FactApiClient: FactAdapter = {
+  set: (fact) => client.put(`/`, fact).then((res) => res.data),
 
-  updateById: ({ id, ...fact }) =>
-    client.post<Fact[]>(`/${Number(id)}`, fact).then((res) => res.data),
+  get: ({ key }) =>
+    client.get<Fact>(`/${encodeURIComponent(key)}`).then((res) => res.data),
 
-  updateByPathKey: (update, fact) =>
+  // updateByPathKey: (update, fact) =>
+  //   client
+  //     .post<Fact[]>(`/${enc(update.path)}/${enc(update.key.toString())}`, fact)
+  //     .then((res) => res.data),
+
+  del: ({ key }) => client.delete(`/${key}`).then((res) => res.data),
+
+  // getPathCounts: () =>
+  //   client.get<PathCountResults>(`/?count=path`).then((res) => res.data),
+
+  find: ({ keyPrefix }) =>
     client
-      .post<Fact[]>(`/${enc(update.path)}/${enc(update.key.toString())}`, fact)
+      .get<Fact[]>(`/?keyPrefix=${enc(keyPrefix)}`)
       .then((res) => res.data),
 
-  removeById: (id) => client.delete(`/${id}`).then((res) => res.data),
-
-  getPathCounts: () =>
-    client.get<PathCountResults>(`/?count=path`).then((res) => res.data),
-
-  findFactsByPathKeys: ({ path, key, limit }) =>
-    client
-      .get<Fact[]>(`/`, {
-        params: {
-          path,
-          key: toArray(key),
-          limit: limit ?? 50,
-        },
-      })
-      .then((res) => res.data),
-
-  findAllFactsByPath: ({ path, limit }) =>
-    client
-      .get<Fact[]>(`/${encodeURIComponent(path)}`, {
-        params: {
-          limit: limit ?? 250,
-        },
-      })
-      .then((res) => res.data),
+  // findAllFactsByPath: ({ path, limit }) =>
+  //   client
+  //     .get<Fact[]>(`/${encodeURIComponent(path)}`, {
+  //       params: {
+  //         limit: limit ?? 250,
+  //       },
+  //     })
+  //     .then((res) => res.data),
 };
 
 export default FactApiClient;
