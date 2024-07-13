@@ -1,0 +1,566 @@
+_type: export
+__export_format: 4
+__export_date: 2023-12-21T13:35:41.789Z
+__export_source: insomnia.desktop.app:v2023.1.0
+resources:
+  - _id: req_2229466fec5a4534a1cdad16d70c9188
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703155852078
+    created: 1703155705151
+    url: "{{ _.baseUrl }}/api/facts/user/1"
+    name: /facts/
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+    parameters:
+      - name: path
+        value: user
+        disabled: false
+        id: pair_2661d1acf37c4d458736046d2d22c137
+      - name: key
+        value: ""
+        disabled: false
+        id: pair_318170b1008c46bb8bba04af6bd59edf
+      - name: limit
+        value: "50"
+        disabled: false
+        id: pair_a534c14d2dc54108b04d092ca670a97c
+    headers:
+      - name: Accept
+        value: "*/*"
+      - name: Accept-Language
+        value: en-US,en;q=0.9
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1668765395509.25
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_45ca3d695b69418baacb2a7cf808b4c5
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1667194669004
+    created: 1667180991050
+    name: Queries & Lookups
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1667187199145
+    _type: request_group
+  - _id: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    parentId: null
+    modified: 1667177779628
+    created: 1667177779628
+    name: New Document
+    description: ""
+    scope: design
+    _type: workspace
+  - _id: req_6803c64a723543ddae3f0ba4d480950b
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703155713467
+    created: 1668992197765
+    url: "{{ _.baseUrl }}/api/facts/user/1"
+    name: /facts/user/1
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+    parameters:
+      - name: path
+        value: user
+        disabled: false
+        id: pair_2661d1acf37c4d458736046d2d22c137
+      - name: key
+        value: ""
+        disabled: false
+        id: pair_318170b1008c46bb8bba04af6bd59edf
+      - name: limit
+        value: "50"
+        disabled: false
+        id: pair_a534c14d2dc54108b04d092ca670a97c
+    headers:
+      - name: Accept
+        value: "*/*"
+      - name: Accept-Language
+        value: en-US,en;q=0.9
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1668425192125.625
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_bbe4ce85fdc64400b42843619652acb8
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703164839409
+    created: 1668993656617
+    url: "{{ _.baseUrl }}/api/facts/user/123"
+    name: /facts/user/123
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+    parameters:
+      - name: path
+        value: user
+        disabled: false
+        id: pair_2661d1acf37c4d458736046d2d22c137
+      - name: key
+        value: "1"
+        disabled: false
+        id: pair_318170b1008c46bb8bba04af6bd59edf
+      - name: limit
+        value: "50"
+        disabled: false
+        id: pair_a534c14d2dc54108b04d092ca670a97c
+    headers:
+      - name: Accept
+        value: "*/*"
+      - name: Accept-Language
+        value: en-US,en;q=0.9
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667631384230.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_34e2573afbe74f1cb5a1307fcb7adbe0
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703165708771
+    created: 1668993113028
+    url: "{{ _.baseUrl }}/api/facts/user/456"
+    name: /facts/user/456
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+    parameters:
+      - name: path
+        value: user
+        disabled: false
+        id: pair_2661d1acf37c4d458736046d2d22c137
+      - name: key
+        value: ""
+        disabled: false
+        id: pair_318170b1008c46bb8bba04af6bd59edf
+      - name: limit
+        value: "50"
+        disabled: false
+        id: pair_a534c14d2dc54108b04d092ca670a97c
+    headers:
+      - name: Accept
+        value: "*/*"
+      - name: Accept-Language
+        value: en-US,en;q=0.9
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667517983102.625
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_d384fac46ecc413284a834b02ae60bde
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703165716302
+    created: 1703165716303
+    url: "{{ _.baseUrl }}/api/facts/user/456"
+    name: /facts/user/789
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+    parameters:
+      - name: path
+        value: user
+        disabled: false
+        id: pair_2661d1acf37c4d458736046d2d22c137
+      - name: key
+        value: ""
+        disabled: false
+        id: pair_318170b1008c46bb8bba04af6bd59edf
+      - name: limit
+        value: "50"
+        disabled: false
+        id: pair_a534c14d2dc54108b04d092ca670a97c
+    headers:
+      - name: Accept
+        value: "*/*"
+      - name: Accept-Language
+        value: en-US,en;q=0.9
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667461282538.6875
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_816d629a4d0b4b8497eeafaa41075e67
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703098487399
+    created: 1668994001597
+    url: "{{ _.baseUrl }}/api/facts"
+    name: /facts?path=user&key=1
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+    parameters:
+      - name: path
+        value: user
+        disabled: false
+        id: pair_2661d1acf37c4d458736046d2d22c137
+      - name: key
+        value: "9999"
+        disabled: false
+        id: pair_318170b1008c46bb8bba04af6bd59edf
+      - name: limit
+        value: "50"
+        disabled: false
+        id: pair_a534c14d2dc54108b04d092ca670a97c
+    headers:
+      - name: Accept
+        value: "*/*"
+      - name: Accept-Language
+        value: en-US,en;q=0.9
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667404581974.75
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_723c69b68676432e8a430eabca95a420
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703098492688
+    created: 1667181047869
+    url: "{{ _.baseUrl }}/api/facts/user"
+    name: "all facts by path: user"
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779644
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_58e501f7579d4992bf038995e276ac9e
+    parentId: fld_45ca3d695b69418baacb2a7cf808b4c5
+    modified: 1703098497213
+    created: 1667178017113
+    url: "{{ _.baseUrl }}/api/facts?path=user&key=123,456"
+    name: query user path + keys
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779594
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_2b0202178c3c437a98c09e7d279fec6d
+    parentId: fld_603bfec942bf4b5892eafd564670ebfd
+    modified: 1703164899953
+    created: 1667177779644
+    url: "{{ _.baseUrl }}/api/facts/user/123"
+    name: create user fact
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"id": "0000-0000-0000-0000",
+        	"value": "42"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_9c917d9371af4f8fb61d9e12080c7f7a
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779719
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_603bfec942bf4b5892eafd564670ebfd
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1667194688324
+    created: 1667181029766
+    name: Create Facts
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1667187199132.5
+    _type: request_group
+  - _id: req_04e1505e375a4def8e878aa9794574f9
+    parentId: fld_603bfec942bf4b5892eafd564670ebfd
+    modified: 1703165676966
+    created: 1667178293166
+    url: "{{ _.baseUrl }}/api/facts/user/456"
+    name: create user fact 456
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"path": "user",
+        	"key": "456",
+        	"value": "{\"json\": true}"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_9c917d9371af4f8fb61d9e12080c7f7a
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779694
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_b4c39bbc930944ca9e9a89c468e5a24d
+    parentId: fld_603bfec942bf4b5892eafd564670ebfd
+    modified: 1703156029313
+    created: 1667178580506
+    url: "{{ _.baseUrl }}/api/facts/user/789"
+    name: create json fact
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"path": "user",
+        	"key": "789",
+        	"value": "{\"json\": true}"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_9c917d9371af4f8fb61d9e12080c7f7a
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779669
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_17b80d4b97774bc7b4d056640f88920a
+    parentId: fld_4898d5937e144f0cbaf68ba0d2a80159
+    modified: 1703164529175
+    created: 1667182492378
+    url: "{{ _.baseUrl }}/api/facts/user/123"
+    name: update user fact 456
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"note": "posted!",
+        	"value": "{\"json\": true, \"updated\": \"🚀\"}"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_9c917d9371af4f8fb61d9e12080c7f7a
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779606.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_4898d5937e144f0cbaf68ba0d2a80159
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1667194680169
+    created: 1667182504314
+    name: Update Facts
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1667187199120
+    _type: request_group
+  - _id: req_e23069e90d5e4d30ad4a63852026c73b
+    parentId: fld_90fd2204f6f04884942ee0b6138ced55
+    modified: 1703165512814
+    created: 1667187218274
+    url: "{{ _.baseUrl }}/api/facts/user/456"
+    name: delete user fact Id 2
+    description: ""
+    method: DELETE
+    body: {}
+    parameters: []
+    headers: []
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779600.25
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_90fd2204f6f04884942ee0b6138ced55
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1667187199095
+    created: 1667187199095
+    name: Delete Facts
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1667187199095
+    _type: request_group
+  - _id: req_894ac9d9cf1d46a58adf850e1f63a08e
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1703098437954
+    created: 1667180948271
+    url: "{{ _.baseUrl }}/api/facts/user"
+    name: query facts by path
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication:
+      type: bearer
+      token: "{{ _.token }}"
+    metaSortKey: -1667177779544
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: env_6bee839f37c23ca665088009476c898b89000812
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1703098374590
+    created: 1667177779641
+    name: Base Environment
+    data:
+      baseUrl: http://localhost:8080
+      token: tahjisheiPaa9taem3oo
+    dataPropertyOrder:
+      "&":
+        - baseUrl
+        - token
+    color: null
+    isPrivate: false
+    metaSortKey: 1667177779641
+    _type: environment
+  - _id: jar_6bee839f37c23ca665088009476c898b89000812
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1667177779642
+    created: 1667177779642
+    name: Default Jar
+    cookies: []
+    _type: cookie_jar
+  - _id: spc_f2308dc4028c46468c1379d060f1a62f
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1667177810830
+    created: 1667177779638
+    fileName: FactService
+    contents: ""
+    contentType: yaml
+    _type: api_spec
+  - _id: uts_7cd70f3d91aa4571bc0a70372f2cac77
+    parentId: wrk_8dd5dd2ed5804cd09e5acacd0bb68555
+    modified: 1667177779645
+    created: 1667177779645
+    name: Example Test Suite
+    _type: unit_test_suite
+  - _id: env_81691a71e6834fcdbc70dde5606aa100
+    parentId: env_6bee839f37c23ca665088009476c898b89000812
+    modified: 1703098190526
+    created: 1667177837798
+    name: FactService
+    data:
+      baseUrl: http://localhost:8080
+    dataPropertyOrder:
+      "&":
+        - baseUrl
+    color: "#214263"
+    isPrivate: false
+    metaSortKey: 1667177837798
+    _type: environment

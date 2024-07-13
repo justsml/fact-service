@@ -4,14 +4,16 @@
 
 - [Overview](#overview)
 - [Getting Started](#getting-started)
-  - [Create `.env.local` file](#create-envlocal-file)
-  - [Initialize Database](#initialize-database)
+  - [Create `.env` file](#create-env-file)
+- [Start All Databases](#start-all-databases)
+- [Test Database Integrations](#test-database-integrations)
   - [Start Service](#start-service)
 - [Testing](#testing)
   - [Creating Facts](#creating-facts)
   - [Query Facts](#query-facts)
   - [Updating Facts](#updating-facts)
 - [TODO](#todo)
+  - [Articles](#articles)
   - [Features \& Patterns](#features--patterns)
   - [Security \& Correctness](#security--correctness)
 
@@ -25,36 +27,37 @@ The rest of this README will get you up and running locally.
 
 ## Getting Started
 
-### Create `.env.local` file
+### Create `.env` file
 
-Copy the `.env.example` to `.env.local`.
+Copy the `.env.example` to `.env`.
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 Configure access with the `ALLOWED_TOKENS` environment variable. This is a space-separated set of API tokens that grant access to the service.
 
 Edit any environment variables as needed.
 
-### Initialize Database
+## Start All Databases
+
+Using a handy `docker-compose.yml` file, you can start all databases with a single command.
 
 ```sh
-mkdir -p $HOME/.postgres-data
-docker run \
-  --name facts-database \
-  -v $HOME/.postgres-data:/var/lib/postgresql/data \
-  -p 127.0.0.1:5432:5432 \
-  -e 'POSTGRES_PASSWORD=tru3ted' \
-  --restart on-failure:5 \
-  --detach \
-  --shm-size=256mb \
-  arm64v8/postgres:14.5-alpine \
-  postgres -c 'listen_addresses=*' \
-    -c 'password_encryption=scram-sha-256' \
-    -c 'shared_memory_type=sysv' \
-    -c 'shared_buffers=256MB' \
-    -c 'max_connections=200'
+docker compose up --build --detach
+docker compose logs -f
+docker compose down --remove-orphans
+```
+
+> Read more about [the database setup](/lib/providers/README.md).
+
+## Test Database Integrations
+
+```sh
+yarn test:pg
+yarn test:redis
+yarn test:dynamo
+yarn test:cassandra
 ```
 
 ### Start Service
@@ -75,7 +78,7 @@ npm start
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:3000/api/facts \
+  --url http://127.0.0.1:4000/api/facts/user:456 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -87,7 +90,7 @@ curl --request PUT \
 
 ```sh
 curl --request PUT \
-  --url http://127.0.0.1:3000/api/facts \
+  --url http://127.0.0.1:4000/api/facts/user:789 \
   --header 'Content-Type: application/json' \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
   --data '{
@@ -104,7 +107,7 @@ curl --request PUT \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:3000/api/facts?path=user&key=123%2C456'
+  --url 'http://127.0.0.1:4000/api/facts/user?matchSuffix=456,789'
 ```
 
 #### Get the count for every unique path
@@ -112,7 +115,7 @@ curl --request GET \
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url 'http://127.0.0.1:3000/api/facts/stats/path-count'
+  --url 'http://127.0.0.1:4000/api/stats/path-count'
 ```
 
 ```json
@@ -129,7 +132,7 @@ Finds all Facts matching the path `user`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:3000/api/facts/user
+  --url http://127.0.0.1:4000/api/facts/user
 ```
 
 Finds all Facts matching the path `user/overrides`.
@@ -137,7 +140,7 @@ Finds all Facts matching the path `user/overrides`.
 ```sh
 curl --request GET \
   --header 'x-token: 527E0695-0000-0000-0000-46BEA59C9294' \
-  --url http://127.0.0.1:3000/api/facts/user%2Foverrides
+  --url http://127.0.0.1:4000/api/facts/user%2Foverrides
 # Note the URI Escaped path: user%2Foverrides (i.e. user/overrides)
 ```
 
@@ -145,7 +148,7 @@ curl --request GET \
 
 ```sh
 curl --request POST \
-  --url http://127.0.0.1:3000/api/facts/3 \
+  --url http://127.0.0.1:4000/api/facts/3 \
   --header 'Content-Type: application/json' \
   --data '{
   "path": "user",
@@ -156,12 +159,34 @@ curl --request POST \
 
 ## TODO
 
-- [ ] Convert this to yarn workspaces (Monorepo). Add `fact-editor` project, deployment, etc.
+- [ ] Add Elysia server example.
+- [x] Add integration tests.
+- [x] Add benchmark scripts.
+- [x] Example of simple CLI w/ Bash ([View CLI Source](/bin/fact-cli))
+- [ ] Simplify Key/Path pattern. (e.g. `['user', 123]` -> `user:123`)
+- [ ] Add `FactStore` interface & implementations.
+  - [x] Postgres
+  - [x] Redis
+  - [x] DynamoDB
+  - [x] Firestore
+  - [x] Cassandra
+  - [ ] FoundationDB
+  - [ ] S3?
+  - [ ] ClickHouse
+  - [ ] ???
+- [ ] Convert to workspace (Monorepo).
+  - [ ] Add `fact-editor` project, deployment, etc.
+- [ ] Make native ESM all the way through.
+
+### Articles
+
+- [ ] Write up on `./bin/fact-cli` and how to use it.
+- [ ] Write up on practical testing.
 
 ### Features & Patterns
 
 - [ ] Add Dockerfile & compose configs.
-  - [ ] Set up ECS + Fargate deployment. (Terraform? CDK? CFN?)
+  - [ ] Set up ECS + Fargate deployment. (Terraform? CDK? CF?)
 - [ ] Make API more RESTful.
   - [ ] Use `PUT` & `POST` (`PATCH`?) for creating and updating Facts.
   - [ ] Use `GET` for querying Facts.

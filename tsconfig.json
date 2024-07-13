@@ -1,24 +1,43 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["esnext"],
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "alwaysStrict": true,
     "baseUrl": ".",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "isolatedModules": false,
-    "module": "CommonJS",
-    "moduleResolution": "node",
-    "noEmit": true,
-    "noFallthroughCasesInSwitch": true,
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "jsx": "react-jsx", // support JSX
     "outDir": "dist",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "allowJs": true, // allow importing `.js` from `.ts`
     "sourceMap": true,
+    // "declarationMap": true,
+    "declaration": false,
+    // Bundler mode
+    "moduleResolution": "Bundler",
+    // "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+
+    "allowArbitraryExtensions": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+
+    // Best practices
     "strict": true,
-    "useUnknownInCatchVariables": false
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    // Some stricter flags
+    "useUnknownInCatchVariables": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    "paths": {
+      "@/common/*": ["./common/*"],
+      "@/*": ["./lib/*"]
+    },
+    "types": ["bun-types", "node"]
   },
   "include": ["./**/*.ts", "./**/*.tsx", "./**/*.js", "./**/*.jsx"],
   "exclude": ["**/node_modules", "**/.*/", "dist"]

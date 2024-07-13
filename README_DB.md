@@ -54,18 +54,19 @@ Update the default script to use `.truncate()` instead of `.del()`, for example:
 ```js
 /**
  * @param { import("knex").Knex } knex
- * @returns { Promise<void> } 
+ * @returns { Promise<void> }
  */
-exports.seed = async function(knex) {
-  if (process.env.NODE_ENV === 'production') throw new Error('User Error: DB Seeding disabled in production!');
+exports.seed = async function (knex) {
+  if (process.env.NODE_ENV === "production")
+    throw new Error("User Error: DB Seeding disabled in production!");
 
   // Deletes ALL existing entries and resets id sequences
-  await knex('table_name').truncate();
+  await knex("table_name").truncate();
 
-  await knex('table_name').insert([
-    {id: 1, colName: 'rowValue1'},
-    {id: 2, colName: 'rowValue2'},
-    {id: 3, colName: 'rowValue3'},
+  await knex("table_name").insert([
+    { id: 1, colName: "rowValue1" },
+    { id: 2, colName: "rowValue2" },
+    { id: 3, colName: "rowValue3" },
   ]);
   // For visualizing the data added to the database:
   // .returning('*')
