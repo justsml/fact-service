@@ -8,8 +8,9 @@ export const toCsvString = (value: any) =>
     ? value?.filter(Boolean)?.join(",")
     : `${value}`.split(",").filter(Boolean).join(",");
 
-export const getKeyFromParamsOrQuery = (request: Request) => {
-  let { key } = request.params;
+export const extractPathAndKeys = (request: Request) => {
+  let { path, key } = request.params;
+  if (!path && request.query.path) path = `${request.query.path}`;
   if (!key && request.query?.key) key = `${toCsvString(request.query?.key)}`;
-  return { key };
+  return { path, key };
 };
