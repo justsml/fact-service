@@ -1,10 +1,39 @@
-import UserError from "./userError";
+import type { Request, Response, NextFunction } from "express";
+import { appEnv } from "../lib/config";
+import { NotFoundError, UserError } from "../lib/factService/errors";
+import { logger } from "./logger";
+// import UserError from "./userError";
 
-export interface IQueryParameters {
-  limit?: number;
-  offset?: number;
-  orderBy?: [string, "asc" | "desc"];
+export function notFoundHandler(request: Request, response: Response) {
+  response.status(404).send({ error: "Not found!", url: request.originalUrl });
 }
+
+export function errorHandler(
+  error: Error & { status?: number },
+  request: Request,
+  response: Response,
+  _next: NextFunction,
+) {
+  logger.error("ERROR %o", error);
+  if (error instanceof NotFoundError)
+    return response
+      .status(404)
+      .send({ error: error.message ?? "Not found!", url: request.originalUrl });
+  const stack = process.env.NODE_ENV !== "production" ? error.stack : undefined;
+  const status = error?.status ?? 500;
+  response.status(status);
+  if (error instanceof UserError || error.name === "UserError") {
+    response.status(400).json({ error: error.message });
+  } else {
+    response.send({ error: error.message, stack, url: request.originalUrl });
+  }
+}
+
+// export interface IQueryParameters {
+//   limit?: number;
+//   offset?: number;
+//   orderBy?: [string, "asc" | "desc"];
+// }
 
 export function getQueryOptions(
   query: {
@@ -28,20 +57,50 @@ export function getQueryOptions(
   return { offset, limit, orderBy: orderByPair };
 }
 
-export const checkInvalidInputError =
-  <TContextType = unknown>(context: TContextType) =>
+export const checkPostgresError =
+  <TContextType = unknown>(context: TContextType | undefined) =>
   (error: Error) => {
-    console.error("ERROR", error);
-    const msg = error.message;
-    const lastPart = msg.split(`invalid input`)[1];
-    if (lastPart) throw new UserError(`Database Error: ${lastPart}`);
+    checkInvalidInputError(context)(error);
+    checkDuplicateKeyError(context)(error);
+    checkRelationError(context)(error);
     throw error;
   };
-export const checkDuplicateKeyError =
-  <TContextType = unknown>(context: TContextType) =>
+
+export const checkInvalidInputError =
+  <TContextType = unknown>(_context: TContextType | undefined) =>
   (error: Error) => {
+    if (appEnv !== "development") _context = undefined;
+
+    logger.error("ERROR %o", error);
+    const msg = error.message;
+    const lastPart = msg.split(`invalid input`)[1];
+    if (lastPart) throw UserError(`Database Error: ${lastPart}`);
+    throw error;
+  };
+
+export const checkDuplicateKeyError =
+  <TContextType = unknown>(context: TContextType | undefined) =>
+  (error: Error) => {
+    if (appEnv !== "development") context = undefined;
     if (error.message.includes("duplicate key")) {
-      throw new UserError(`Fact already exists! Context: ${JSON.stringify(context)}`);
+      throw UserError(
+        `Fact already exists! Context: ${JSON.stringify(context)}`,
+      );
+    }
+    throw error;
+  };
+
+export const checkRelationError =
+  <TContextType = unknown>(context: TContextType | undefined) =>
+  (error: Error) => {
+    if (appEnv !== "development") context = undefined;
+    if (error.message.includes("of relation")) {
+      const msg = error.message
+        .split(" - column")[1]
+        .replace("relation", "table");
+      throw UserError(
+        `Database error: ${msg}. Context: ${JSON.stringify(context)}`,
+      );
     }
     throw error;
   };

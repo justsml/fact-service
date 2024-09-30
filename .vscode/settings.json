@@ -1,0 +1,5 @@
+{
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.preferences.importModuleSpecifier": "shortest"
+}

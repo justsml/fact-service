@@ -1,4 +1,8 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
+
+const debugMode = process.env.DEBUG_MODE || false;
+
 
 const { DATABASE_URL, DATABASE_URI } = process.env;
 const databaseUrl = DATABASE_URL || DATABASE_URI;
@@ -6,17 +10,20 @@ const databaseUrl = DATABASE_URL || DATABASE_URI;
 /**
  * @type { import("knex").Knex.Config }
  */
-const config = {
+const connectionConfig = {
   client: "pg",
   connection:
     databaseUrl || "postgres://postgres:postgres@localhost:5432/postgres",
-  migrations: { directory: "./db/migrations", tableName: "knex_migrations_facts" },
+  migrations: {
+    directory: "./db/migrations",
+    tableName: "knex_migrations_facts",
+  },
   seeds: { directory: "./db/seeds" },
-  // debug: true,
+  debug: Boolean(debugMode),
 };
 
-module.exports = {
-  development: config,
-  staging: config,
-  production: config,
+export default {
+  development: connectionConfig,
+  staging: connectionConfig,
+  production: connectionConfig,
 };

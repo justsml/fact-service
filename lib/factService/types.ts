@@ -1,54 +1,82 @@
-import type { IQueryParameters } from "../../common/routeUtils";
+import { t } from "elysia";
+import type { DbAdapter } from "../config";
 
-/** Fact type describes records in the `fact_store` table. */
+/**
+ * FactEntity is the raw database record
+ */
+export type FactEntity  = (typeof FactResponseTypeDef)["static"];
+
+/** Type guard for FactEntity */
+export const isFactEntity = (obj: unknown): obj is FactEntity => {
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+  const { key, value } = obj as FactEntity;
+  return (
+    typeof key === "string" &&
+    (typeof value === "object" ||
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      Array.isArray(value))
+  );
+};
+
+export const FactResponseTypeDef = t.Object({
+  key: t.String(),
+  value: t.Union([
+    t.Object({}, { additionalProperties: true }),
+    t.Array(t.Any()),
+    t.String(),
+    t.Number(),
+    t.Boolean(),
+  ]),
+  created_by: t.Optional(t.String()),
+  updated_by: t.Optional(t.String()),
+  created_at: t.Optional(t.Union([t.Date({}), t.String(), t.Number()])),
+  updated_at: t.Optional(t.Union([t.Date({}), t.String(), t.Number()])),
+});
+
+/** Fact is the API response */
 export interface Fact {
-  id: number | bigint | string;
-  path: string;
-  key: string;
-  value: object;
-  created_at?: Date;
-  updated_at?: Date;
+  [key: string]: unknown;
+  created_at?: Date | string | number;
+  updated_at?: Date | string | number;
 }
-export type PathCountResults = Record<string, number>;
-export type IdentityType = Fact['id']; // number | bigint | string;
+
+/** KeyFact describes the input for update/set */
+export type KeyFact = Pick<FactEntity, "key" | "value">;
+
+// /** PathCountResults is the response from getPathCounts (`/api/stats`) */
+// export type PathCountResults = Record<string, number>;
 export type BatchResultMessage = {
   success: boolean;
   message: string;
   count: number;
 };
+export const BatchResultTypeDef = t.Object({
+  success: t.Boolean(),
+  message: t.String(),
+  count: t.Number(),
+});
 
 /**
  * The FactService interface helps our http & database clients stay aligned.
  */
-export interface FactService {
-  /** Create a Fact, include `path`, `key`, and `value` */
-  create: (fact: Omit<Fact, 'id'>) => Promise<Fact[]>;
-  /** Update a Fact, include `id`, `path`, `key`, and `value` */
-  updateById: (fact: Fact) => Promise<Fact[]>;
-  /** Update a Fact, include `id`, `path`, `key`, and `value` */
-  updateByPathKey: (updatePathKey: IFactPathKey, fact: Omit<Fact, 'id'>) => Promise<Fact[]>;
+export interface FactAdapter {
+  readonly _name: DbAdapter | "http";
+  /** Get a Fact, by key */
+  get: ({ key }: { key: string }) => Promise<FactEntity | undefined>;
+  /** Create/update a Fact, key & payload */
+  set: ({ key, value }: KeyFact) => Promise<FactEntity | FactEntity[]>;
   /** Delete a Fact by id */
-  removeById: (id: IdentityType) => Promise<BatchResultMessage>;
-  /** Group & count unique paths */
-  getPathCounts: () => Promise<PathCountResults>;
+  del: ({ key }: { key: string }) => Promise<BatchResultMessage>;
   /** Find all facts matching a path and one or more keys. */
-  findFactsByPathKeys: (
-    query: IFactServiceQuery & IQueryParameters,
-  ) => Promise<Fact[]>;
+  find: ({ keyPrefix }: { keyPrefix: string }) => Promise<FactEntity[]>;
   /** Find all facts by path */
-  findAllFactsByPath: (
-    query: { path: string } & IQueryParameters,
-  ) => Promise<Fact[]>;
-}
-
-/** For querying many keys for a path */
-export interface IFactServiceQuery {
-  path: string;
-  key: IdentityType | IdentityType[];
-}
-
-/** Singular path + key lookup */
-export interface IFactPathKey {
-  path: string;
-  key: IdentityType;
+  // findAllFactsByPath: (
+  //   query: { path: string } & IQueryParameters,
+  // ) => Promise<Fact[]>;
+  // /** Group & count unique paths */
+  // getPathCounts: () => Promise<PathCountResults>;
 }
