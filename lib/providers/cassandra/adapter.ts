@@ -1,4 +1,4 @@
-import type { Fact, FactAdapter } from "../../factService/types";
+import { isFactEntity, type FactAdapter, type FactEntity } from "../../factService/types";
 import cassandra, { Client } from "cassandra-driver";
 import { logger } from "../../../common/logger";
 import { cassandraUrl } from "../../config";
@@ -15,18 +15,18 @@ const requestTracker = new cassandra.tracker.RequestLogger({
 });
 
 const convertKeyToListLiteral = (key: string) =>
- `${key
-  .split(/[/:]+/gim)
-  .map((k) => `'${k.replace(/'+/gim, "")}'`)
-  .join(", ")}`;
-
-  const convertKeyToContainsExpression = (key: string) =>
   `${key
-   .split(/[/:]+/gim)
-   .map((k) => `key_parts CONTAINS '${k.replace(/'+/gim, "")}'`)
-   .join(" AND ")}`;
- 
- const client = new Client({
+    .split(/[/:]+/gim)
+    .map((k) => `'${k.replace(/'+/gim, "")}'`)
+    .join(", ")}`;
+
+const convertKeyToContainsExpression = (key: string) =>
+  `${key
+    .split(/[/:]+/gim)
+    .map((k) => `key_parts CONTAINS '${k.replace(/'+/gim, "")}'`)
+    .join(" AND ")}`;
+
+const client = new Client({
   contactPoints: [cassandraUrl ?? "localhost"],
   localDataCenter: "datacenter1",
   // keyspace: KEY_SPACE,
@@ -49,7 +49,7 @@ client.on("error", (error) => {
 export const adapter: FactAdapter = {
   _name: "cassandra",
 
-  set: async ({ key, fact }) => {
+  set: async ({ key, value }) => {
     const query = `INSERT INTO ${KEY_SPACE}.${TABLE_NAME} \
       (
         key,
@@ -57,15 +57,17 @@ export const adapter: FactAdapter = {
         value,
         created_at,
         updated_at
-      ) VALUES (?, {${convertKeyToListLiteral(key)}}, ?, ?, ?) USING TIMESTAMP ?`;
-    fact = Object.fromEntries(
-      Object.entries(fact).map(([k, v]) => [k, `${v}`]),
+      ) VALUES (?, {${convertKeyToListLiteral(
+        key,
+      )}}, ?, ?, ?) USING TIMESTAMP ?`;
+    value = Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, `${v}`]),
     );
 
-    const params = [key, fact, Date.now(), Date.now(), Date.now()];
+    const params = [key, value, Date.now(), Date.now(), Date.now()];
     try {
       await client.execute(query, params, { prepare: true }).catch(autoSetup);
-      logger.info("CASSANDRA.set(%o)", { key, fact });
+      logger.info("CASSANDRA.set(%o)", { key, value });
       const saved = await adapter.get({ key });
       logger.info("CASSANDRA.getting(%s) %o", key, saved);
       return saved!;
@@ -83,8 +85,12 @@ export const adapter: FactAdapter = {
         .catch(autoSetup);
       console.log("result:", result);
       if (result.rowLength <= 0)
-        throw new NotFoundError(`Key not found: ${key}`);
-      return result.rows[0]; // Adjust as needed
+        throw new NotFoundError(`[Cassandra] Key not found: ${key}`);
+
+        const fact = result.rows[0];
+        if (isFactEntity(fact)) return fact;
+
+        throw new Error(`[Cassandra] Invalid fact: ${key}`);
     } catch (error) {
       logger.error(error);
       throw error;
@@ -117,8 +123,24 @@ export const adapter: FactAdapter = {
       const result = await client.execute(query, [], {
         prepare: true,
       });
-      // .catch(autoSetup);
-      return result.rows as Fact[]; // Adjust as needed
+      const items = result.rows;
+      const validResults = items.filter(isFactEntity);
+      const validKeysFound = validResults.length;
+      const totalKeysFound = items.length;
+
+      logger.debug("CASSANDRA.find: %j", items);
+      logger.debug({
+        keyPrefix,
+        validKeysFound,
+        totalKeysFound,
+      }, "CASSANDRA.find");
+
+      if (totalKeysFound > validKeysFound)
+        throw Error(
+          `Invalid fact(s) found: ${totalKeysFound - validKeysFound}`,
+        );
+
+      return validResults as unknown as FactEntity[];
     } catch (error) {
       logger.error(error);
       throw error;

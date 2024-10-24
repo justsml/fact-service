@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 const debugMode = process.env.DEBUG_MODE || false;
 
-require("dotenv").config();
 
 const { DATABASE_URL, DATABASE_URI } = process.env;
 const databaseUrl = DATABASE_URL || DATABASE_URI;
@@ -17,11 +19,19 @@ const connectionConfig = {
     tableName: "knex_migrations_facts",
   },
   seeds: { directory: "./db/seeds" },
-  debug: Boolean(debugMode),
+  debug: toBool(debugMode),
 };
 
-module.exports = {
+export default {
   development: connectionConfig,
   staging: connectionConfig,
   production: connectionConfig,
 };
+
+const toBool = (value) => {
+  if (typeof value === "string") {
+    value = value.trim().toLowerCase();
+    if (["on", "true", "yes", "1"].includes(value)) return true;
+  }
+  return false;
+}

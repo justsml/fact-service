@@ -1,105 +1,146 @@
-import "dotenv/config";
+#!/usr/bin/env npx tsx
+import dotenv from "dotenv";
 
-import { easyConfig } from "@elite-libs/auto-config";
-// import { escapeRegExp } from "lodash";
+dotenv.config();
 
-const config = easyConfig({
-  env: ["FACTS_ENV", "NODE_ENV"],
-  port: ["--port", "-p", "PORT"],
-  allowedTokens: ["--allowedTokens", "ALLOWED_TOKENS"],
+import yargs from "yargs/yargs";
+import { hideBin } from "yargs/helpers";
 
-  debugMode: ["--debug", "DEBUG_MODE"],
-  verbose: ["--verbose", "VERBOSE"],
-  // Dynamic DB_ADAPTER var controls which DB adapter is used
-  dbAdapter: ["--dbAdapter", "DB_ADAPTER"],
+export const AvailableAdapters = [
+  "postgres",
+  "redis",
+  "dynamo",
+  "firestore",
+  "cassandra",
+  // "foundation",
+] as const;
 
-  logLevel: ["--logLevel", "LOG_LEVEL"],
+export type DbAdapter = typeof AvailableAdapters[number];
 
-  testAdapters: ["--testAdapters", "TEST_ADAPTERS"],
+export const config = yargs(hideBin(process.argv))
+  .option("appEnv", {
+    alias: "e",
+    type: "string",
+    default: process.env["NODE_ENV"] ?? "development",
+    description: "Sets the environment in which the app runs",
+  })
+  .option("port", {
+    alias: "p",
+    type: "number",
+    default: process.env["PORT"] ?? 3000,
+    description: "Sets the port on which the app listens",
+  })
+  .option("allowedTokens", {
+    alias: "t",
+    type: "array",
+    default: process.env["ALLOWED_TOKENS"]?.split(/ ,/g) ?? [],
+    description: "Sets the tokens that are allowed to access the app",
+  })
+  .option("debugMode", {
+    alias: "d",
+    type: "boolean",
+    default: false,
+    description: "Enables or disables debug mode",
+  })
+  .option("dbAdapter", {
+    alias: ["a", "adapter"],
+    type: "string",
+    default: process.env["DB_ADAPTER"] ?? "postgres",
+    description: "Sets the database adapter to use",
+    choices: AvailableAdapters,
+  })
+  .option("testAdapters", {
+    alias: "A",
+    type: "array",
+    default: process.env["TEST_ADAPTERS"]?.split(" ") ?? [],
+    description: "Sets the adapters to use for testing",
+    choices: AvailableAdapters,
+  })
+  .option("testTargetUrl", {
+    alias: "T",
+    type: "string",
+    default: process.env["TEST_TARGET"] ?? undefined,
+    description: "Sets the target URL for testing an HTTP target",
+  })
+  .option("logLevel", {
+    alias: "l",
+    type: "string",
+    default: process.env["LOG_LEVEL"] ?? "info",
+    description: "Sets the level of logging",
+  })
+  .option("databaseUrl", {
+    alias: "db",
+    type: "string",
+    default: process.env["DATABASE_URL"] ?? "postgres://127.0.0.1:5432",
+    description: "Sets the URL for the database",
+  })
+  .option("redisUrl", {
+    alias: "r",
+    type: "string",
+    default: process.env["REDIS_URL"] ?? "redis://127.0.0.1:6379",
+    description: "Sets the URL for the Redis server",
+  })
+  .option("dynamoDbUrl", {
+    alias: "D",
+    type: "string",
+    default: process.env["DYNAMODB_URL"] ?? "http://127.0.0.1:8000",
+    description: "Sets the URL for the DynamoDB server",
+  })
+  .option("firestoreUrl", {
+    alias: "f",
+    type: "string",
+    default: process.env["FIRESTORE_URL"] ?? "http://127.0.0.1:8080",
+    description: "Sets the URL for the Firestore server",
+  })
+  .option("cassandraUrl", {
+    alias: "c",
+    type: "string",
+    default: process.env["CASSANDRA_URL"] ?? "http://127.0.0.1:9042",
+    description: "Sets the URL for the Cassandra server",
+  })
+  .option("foundationDbUrl", {
+    alias: "F",
+    type: "string",
+    default: process.env["FOUNDATIONDB_URL"] ?? "http://127.0.0.1:4500",
+    description: "Sets the URL for the FoundationDB server",
+  })
+  // .option('pathSeparator', {
+  //   alias: 's',
+  //   type: 'string',
+  //   description: 'Sets the path separator'
+  // })
+  // .option('pathSplitPattern', {
+  //   alias: 'S',
+  //   type: 'string',
+  //   description: 'Sets the path split pattern'
+  // })
+  .help()
+  .alias("help", "h")
+  .version()
+  .alias("version", "V")
 
-  // DB Connection Strings
-  databaseUrl: ["--db", "DATABASE_URL", "DATABASE_URI"],
-  redisUrl: ["--redis", "REDIS_URL", "REDIS_URI"],
-  dynamoDbUrl: ["--dynamoDb", "DYNAMODB_URL", "DYNAMO_URL"],
-  firestoreUrl: ["--firestore", "FIRESTORE_URL", "FIRESTORE_URI"],
-  cassandraUrl: ["--cassandra", "CASSANDRA_URL", "CASSANDRA_URI"],
-  foundationDbUrl: ["--foundationDb", "FOUNDATION_DB_URL", "FOUNDATION_URL"],
-  // pathSeparator: ["--pathSeparator", "PATH_SEPARATOR"],
-  // pathSplitPattern: ["--pathSplitPattern", "PATH_SPLIT_PATTERN"],
-});
+  .option("verbose", {
+    alias: "v",
+    type: "boolean",
+    description: "Run with verbose logging",
+  })
+  .parseSync();
 
-export { config as siteConfig };
 
-// export default config;
-
-export const allowedTokens = _parseTokenList(config.allowedTokens);
-// override the config.allowedTokens?
-// config.allowedTokens = allowedTokens;
-
-export const appEnv = config.env ?? "development";
-
-export const testAdapters =
-  typeof config.testAdapters === "string" && config.testAdapters.length > 1
-    ? config.testAdapters.split(",")
-    : ["postgres", "redis", "dynamo", "cassandra", "firestore"];
-
-export const logLevel =
-  config.logLevel === "fatal"
-    ? "fatal"
-    : config.logLevel === "error"
-      ? "error"
-      : config.logLevel === "warn"
-        ? "warn"
-        : config.logLevel === "info"
-          ? "info"
-          : config.logLevel === "debug"
-            ? "debug"
-            : config.logLevel === "trace"
-              ? "trace"
-              : "info";
-
+export const appEnv = config.appEnv;
+export const allowedTokens = config.allowedTokens as string[];
+export const port = config.port;
 export const debugMode = config.debugMode;
-export const verbose = Boolean(config.verbose);
-export const port = Number(config.port);
+export const dbAdapter = config.dbAdapter;
+export const testAdapters = config.testAdapters;
+export const logLevel = config.logLevel;
 export const databaseUrl = config.databaseUrl;
 export const redisUrl = config.redisUrl;
 export const dynamoDbUrl = config.dynamoDbUrl;
 export const firestoreUrl = config.firestoreUrl;
 export const cassandraUrl = config.cassandraUrl;
 export const foundationDbUrl = config.foundationDbUrl;
+// export const pathSeparator = config.pathSeparator;
+// export const pathSplitPattern = config.pathSplitPattern;
+export const verbose = config.verbose;
 
-export type DbAdapter =
-  | "postgres"
-  | "redis"
-  | "dynamo"
-  | "firestore"
-  | "cassandra"
-  | "foundation";
-
-export const supportedDbAdapters: Readonly<DbAdapter[]> = [
-  "postgres",
-  "redis",
-  "dynamo",
-  "firestore",
-  "cassandra",
-  "foundation",
-] as const;
-
-export const dbAdapter: DbAdapter =
-  config.dbAdapter != null
-    ? supportedDbAdapters.find((adapter) =>
-        config.dbAdapter.startsWith(adapter),
-      ) ?? "postgres"
-    : "postgres";
-
-if (allowedTokens.length <= 0)
-  throw new Error(`ALLOWED_TOKENS is empty. Check config or .env file.`);
-
-/**
- * Splits tokens set in env.ALLOWED_TOKENS (space delimited)
- */
-function _parseTokenList(tokenList: string | string[] | undefined): string[] {
-  if (tokenList == null) return [];
-  if (Array.isArray(tokenList)) return tokenList;
-  return tokenList.split(/\s+/);
-}

@@ -1,17 +1,19 @@
-import { appEnv, logLevel } from "../lib/config";
+import { config } from "../lib/config";
 
 import pino from "pino";
 import pinoHttp from "pino-http";
 import pretty from "pino-pretty";
 
+const { appEnv, logLevel } = config;
+
 export const logStream =
-  appEnv !== "production"
-    ? pretty({
+  appEnv === "production"
+    ? process.stdout
+    : pretty({
         colorize: true,
         singleLine: true,
         ignore: "res.headers,req.headers",
-      })
-    : process.stdout;
+      });
 
 export const logger = pino(
   {

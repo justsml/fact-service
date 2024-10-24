@@ -69,20 +69,23 @@ export const checkPostgresError =
   };
 
 export const checkInvalidInputError =
-  <TContextType = unknown>(context: TContextType | undefined) =>
+  <TContextType = unknown>(_context: TContextType | undefined) =>
   (error: Error) => {
-    if (appEnv !== "development") context = undefined;
+    if (appEnv !== "development") _context = undefined;
 
     logger.error("ERROR %o", error);
     const msg = error.message;
     const lastPart = msg.split(`invalid input`)[1];
-    if (lastPart) throw new UserError(`Database Error: ${lastPart}`);
+    if (lastPart) throw UserError(`Database Error: ${lastPart}`);
     throw error;
   };
 
+
 export const checkDuplicateKeyError =
   <TContextType = unknown>(context: TContextType | undefined) =>
+  <TContextType = unknown>(context: TContextType | undefined) =>
   (error: Error) => {
+    if (appEnv !== "development") context = undefined;
     if (appEnv !== "development") context = undefined;
     if (error.message.includes("duplicate key")) {
       throw new UserError(

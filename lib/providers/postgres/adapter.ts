@@ -1,14 +1,21 @@
-import type { Fact, FactAdapter } from "../../factService/types";
+import {
+  isFactEntity,
+  type FactAdapter,
+  type FactEntity,
+} from "../../factService/types";
 import knex from "../../../db/knex";
 import { checkPostgresError } from "../../../common/routeUtils";
 import { logger } from "../../../common/logger";
+import { toArray } from "../../../common/arrayUtils";
+import { NotFoundError } from "elysia";
 
 export const adapter: FactAdapter = {
   _name: "postgres",
 
-  set: async (fact) =>
-    await knex<Fact>("fact_store")
-      .insert({ ...fact, updated_at: new Date() })
+  async set({ key, value, ...rest }) {
+    // async set(fact) {
+    return await knex<FactEntity>("fact_store")
+      .insert({ ...rest, key, value, updated_at: new Date() })
       .onConflict("key")
       .merge()
       .returning("*")
@@ -17,36 +24,47 @@ export const adapter: FactAdapter = {
       })
       .catch((error) => {
         logger.error("ERROR %o", error);
-        return checkPostgresError({ fact })(error);
-      }),
-
-  get: async ({ key }) =>
-    await knex<Fact>("fact_store")
+        return checkPostgresError({ fact: { key, value } })(error);
+      });
+  },
+  async get({ key }): Promise<FactEntity> {
+    // async get({ key }) {
+    return await knex<FactEntity>("fact_store")
       .select("*")
       .where({ key })
       .first()
-      .catch(checkPostgresError({ key })),
+      .catch(checkPostgresError({ key }))
+      .then((result) => {
+        if (!result)
+          throw new NotFoundError(`Fact not found: ${key}`);
+        if (isFactEntity(result)) return result;
+        logger.warn("Fact Schema Invalid: %o", result);
+        throw Error(`Fact Schema Invalid: ${key}`);
+        // return undefined;
+      });
+  },
 
-  del: async ({ key }) =>
-    await knex<Fact>("fact_store")
-      // .whereIn("key", toArray(key))
-      .where({ key: key })
-      .delete()
-      .then((count) => {
-        // console.log("delete.result:", count);
-        return {
-          success: count > 0,
-          count,
-          message: `Deleted any fact with an id equal to ${key}`,
-        };
-      }),
+  async del({ key }) {
+    return Promise.all([
+      toArray(key).map((key) =>
+        knex<FactEntity>("fact_store").where({ key }).delete(),
+      ),
+    ]).then((results) => {
+      return {
+        success: results.length > 0,
+        count: results.length,
+        message: `Deleted ${results.length} fact(s):`,
+      };
+    });
+  },
 
-  find: async ({ keyPrefix }) =>
-    await knex<Fact>("fact_store")
+  async find({ keyPrefix }) {
+    return await knex<FactEntity>("fact_store")
       .select("*")
       .limit(1_000)
       .whereILike("key", knex.raw(`concat(?::text, '%')`, keyPrefix))
-      .then((rows) => rows as Fact[]),
+      .then((rows) => (rows.every(isFactEntity) ? rows : []));
+  },
 };
 
 export const setup = async () => {

@@ -5,7 +5,7 @@ import { resetDb } from "../lib/providers";
 
 (async () => {
   const results = Promise.allSettled(
-    testAdapters.map(async (adapter) => {
+    testAdapters.map(async (adapter: string) => {
       const setupFn = resetDb(adapter);
       const result = await setupFn();
       return [adapter, result];
