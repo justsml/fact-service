@@ -208,7 +208,7 @@ function autoSetup<TError extends Error>(error: TError) {
     return setup()
       .catch((error) => logger.error("ERROR %o", error))
       .then(() =>
-        Promise.reject(UserError("Table not found! Retry your request.")),
+        Promise.reject(new UserError("Table not found! Retry your request.")),
       );
   }
   throw error;

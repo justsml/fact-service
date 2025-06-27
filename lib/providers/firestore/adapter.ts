@@ -48,17 +48,17 @@ export const adapter: FactAdapter = {
   },
 
   async del({ key }) {
+    let _key = isArray(key) ? key : [key];
     try {
       let count = 0;
-      key = isArray(key) ? key : [key];
-      for await (const k of key) {
+      for await (const k of _key) {
         await firestore.collection(COLLECTION_NAME).doc(k).delete();
         count++;
       }
       return {
         count,
         success: true,
-        message: `Deleted ${count} fact(s) with id(s) ${key.join(", ")}`,
+        message: `Deleted ${count} fact(s) with id(s) ${_key.join(", ")}`,
       };
     } catch (error) {
       logger.error("ERROR %o", error);

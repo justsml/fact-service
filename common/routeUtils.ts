@@ -1,24 +1,26 @@
-import type { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { appEnv } from "../lib/config";
-import { NotFoundError, UserError } from "../lib/factService/errors";
+import { NotFoundError } from "../lib/factService/errors";
 import { logger } from "./logger";
-// import UserError from "./userError";
+import UserError from "./userError";
 
 export function notFoundHandler(request: Request, response: Response) {
-  response.status(404).send({ error: "Not found!", url: request.originalUrl });
+  response
+    .status(404)
+    .send({ error: "Not found!", url: request.originalUrl });
 }
 
 export function errorHandler(
   error: Error & { status?: number },
   request: Request,
   response: Response,
-  _next: NextFunction,
+  next: NextFunction,
 ) {
   logger.error("ERROR %o", error);
   if (error instanceof NotFoundError)
     return response
-      .status(404)
-      .send({ error: error.message ?? "Not found!", url: request.originalUrl });
+    .status(404)
+    .send({ error: error.message ?? "Not found!", url: request.originalUrl });
   const stack = process.env.NODE_ENV !== "production" ? error.stack : undefined;
   const status = error?.status ?? 500;
   response.status(status);
@@ -78,12 +80,15 @@ export const checkInvalidInputError =
     throw error;
   };
 
+
 export const checkDuplicateKeyError =
+  <TContextType = unknown>(context: TContextType | undefined) =>
   <TContextType = unknown>(context: TContextType | undefined) =>
   (error: Error) => {
     if (appEnv !== "development") context = undefined;
+    if (appEnv !== "development") context = undefined;
     if (error.message.includes("duplicate key")) {
-      throw UserError(
+      throw new UserError(
         `Fact already exists! Context: ${JSON.stringify(context)}`,
       );
     }
@@ -98,7 +103,7 @@ export const checkRelationError =
       const msg = error.message
         .split(" - column")[1]
         .replace("relation", "table");
-      throw UserError(
+      throw new UserError(
         `Database error: ${msg}. Context: ${JSON.stringify(context)}`,
       );
     }

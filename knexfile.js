@@ -19,7 +19,7 @@ const connectionConfig = {
     tableName: "knex_migrations_facts",
   },
   seeds: { directory: "./db/seeds" },
-  debug: Boolean(debugMode),
+  debug: toBool(debugMode),
 };
 
 export default {
@@ -27,3 +27,11 @@ export default {
   staging: connectionConfig,
   production: connectionConfig,
 };
+
+const toBool = (value) => {
+  if (typeof value === "string") {
+    value = value.trim().toLowerCase();
+    if (["on", "true", "yes", "1"].includes(value)) return true;
+  }
+  return false;
+}

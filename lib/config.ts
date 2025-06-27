@@ -33,7 +33,7 @@ export const config = yargs(hideBin(process.argv))
   .option("allowedTokens", {
     alias: "t",
     type: "array",
-    default: process.env["ALLOWED_TOKENS"]?.split(" "),
+    default: process.env["ALLOWED_TOKENS"]?.split(/ ,/g) ?? [],
     description: "Sets the tokens that are allowed to access the app",
   })
   .option("debugMode", {
@@ -128,7 +128,7 @@ export const config = yargs(hideBin(process.argv))
 
 
 export const appEnv = config.appEnv;
-export const allowedTokens = config.allowedTokens;
+export const allowedTokens = config.allowedTokens as string[];
 export const port = config.port;
 export const debugMode = config.debugMode;
 export const dbAdapter = config.dbAdapter;

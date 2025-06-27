@@ -47,7 +47,7 @@ export function UserError(this: unknown, message: string) {
 
 export class ServerError extends Error {
   status: number = 500;
-  constructor(message: string,) {
+  constructor(message: string) {
     super(message);
     this.name = "ServerError";
   }
